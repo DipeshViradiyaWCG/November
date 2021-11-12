@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+    <link rel="stylesheet" href="/stylesheets/style.css">
+
+    <title>Ajax task</title>
+  </head>
+  <body>
+      <div class="container">
+          <div class="row mt-5">
+              <div class="col-6">
+                  <form id="form" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label">First Name <span class="text-danger">*</span></label>
+                            <input type="text" name="firstName" class="form-control" id="firstName">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Last Name <span class="text-danger">*</span></label>
+                            <input type="text" name="lastName" class="form-control" id="lastName">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Address <span class="text-danger">*</span></label>
+                            <textarea name="address" id="address" cols="32" rows="5"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">State <span class="text-danger">*</span> :   </label>
+                            <select name="state" id="state" style="width: 60%">
+                                <option value="" disabled selected>-- select state --</option>
+                                <option value="Gujarat">Gujarat</option>
+                                <option value="MP">MP</option>
+                                <option value="UP">UP</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Gender <span class="text-danger">*</span> :   </label>
+                            <input type="radio" name="gender" id="male" value="male">  Male
+                            <input type="radio" name="gender" id="female" value="female">  Female
+                            <input type="radio" name="gender" id="other" value="other">  Other
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Hobby <span class="text-danger">*</span> :   </label>
+                            <input type="checkbox" name="hobby" id="reading" value="reading">  Reading
+                            <input type="checkbox" name="hobby" id="coding" value="coding">  Coding
+                            <input type="checkbox" name="hobby" id="playing" value="playing">  Playing
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Profile Image : </label>
+                            <input type="file" name="profile" id="profile">
+                        </div>
+                        <div class="btns" id="btns">
+                            <button type="submit" class="btn btn-primary" id="btnsubmit">Add user</button>
+                        </div>
+                        <span class="text-danger">*</span> indicates necessary fields
+                        <p id="errorMessage" class="text-danger"></p>
+                    </form>
+              </div>
+
+              <div class="col-6">
+                  <table class="table" id="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Profile</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Gender</th>
+                            <th scope="col">Address</th>
+                            <th scope="col" colspan="2">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{#each users}}
+                        <tr class="{{_id}}">
+                            <td><img src="/images/{{profile}}" height="140"></td>
+                            <td>{{name}}</td>
+                            <td>{{gender}}</td>
+                            <td style="width: 45%;">{{address}}</td>
+                            <td><button class="btn-primary edit-btn" data-id="{{_id}}">Edit</button></td>
+                            <td><button class="btn-danger delete-btn" data-id="{{_id}}">Delete</button></td>
+                        </tr>
+                        {{/each}}
+                    </tbody>
+                </table>
+              </div>
+          </div>
+      </div>
+
+    {{!-- bootstrap --}}
+    <script src="/javascripts/bootstrap.min.js"></script>
+
+    {{!-- jQuery --}}
+    <script src="/javascripts/jquery.js"></script>
+    <script src="/javascripts/jquery-validate.js"></script>
+
+    {{!-- local javascript file --}}
+    <script src="/javascripts/ajax.js"></script>
+  </body>
+</html>
