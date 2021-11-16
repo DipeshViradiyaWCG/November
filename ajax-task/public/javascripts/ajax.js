@@ -1,4 +1,37 @@
+let currentPage = 1;
 $(document).ready(function () {
+
+    /**
+     * 
+     * @param {Active page number when requested on ajax} currentPage 
+     * @param {feild name to sort} feild optional
+     * @param {sorting flag} flag optional
+     * 
+     * function to display users data in paginated manner
+     */
+
+    function displayUsers(currentPage, feild, flag, searchText, searchGender){
+        // console.log(typeof searchText,"     ", searchText.length);
+        if(searchText.length == 0)
+            searchText = "undefined";
+        $.ajax({
+            url: "/displayUsers/" + currentPage + "/" + feild + "/" + flag + "/" + searchText + "/" + searchGender,
+            type: "get",
+            success: function (res) {
+                $('.display-users').html(res);
+                $("a[data-page='"+currentPage+"']").addClass("activeBorder");
+                if(flag){
+                    if(flag > 0){
+                        $("a.sort").attr("title", "Sort in Descending order")    
+                    } else {
+                        $("a.sort").attr("title", "Sort in Ascending order")   
+                    }
+                    $("a.sort").data("flag", Number(flag)*-1);
+                }
+            }
+        }); 
+    }
+    displayUsers(currentPage, undefined, undefined, $("#searchText").val(), $("#genderSelect").val());
 
     // Validate form
     $("#form").validate({
@@ -24,6 +57,7 @@ $(document).ready(function () {
             gender: "Please select gender",
             hobby: "Please select one hobby"
         },
+
         // Set css class to errors
         errorClass : "text-danger",
         errorPlacement: function(error, element) {
@@ -46,18 +80,14 @@ $(document).ready(function () {
             fd.append("gender", $("input[type=radio]:checked").val());
             fd.append("hobby", JSON.stringify(hobbies));
             
-            // Append file data if exists
-            console.log($("#profile")[0].files[0].type);
-            // return;
-            if(!["image/jpg","image/jpeg","image/png"].includes($("#profile")[0].files[0].type)){
-                $("#errorMessage").html("Uploaded file is not image");
-                return;
-            }
+            // Append file data if exist
             if($("#profile")[0].files[0]){
+                if(!["image/jpg","image/jpeg","image/png"].includes($("#profile")[0].files[0].type)){
+                    $("#errorMessage").html("Uploaded file is not image");
+                    return;
+                }
                 fd.append("profile", $("#profile")[0].files[0]);
             }
-
-            console.log(fd);
 
             // Ajax req to add data in DB
             $.ajax({
@@ -68,14 +98,16 @@ $(document).ready(function () {
                 data: fd,
                 success: function (res) {
                     if (res.status == "success") {
-                        $("#table").append("<tr class='"+ res.user._id +"'> <td><img src='/images/" + res.user.profile + "' height='150'></td> <td> " + res.user.name + "</td> <td> " + res.user.gender + "</td> <td> " + res.user.address + "</td> <td><button class='btn-primary edit-btn' data-id='"+ res.user._id+"'>Edit</button> </td> <td><button class='btn-danger delete-btn' data-id='"+res.user._id+"'>Delete</button></td> </tr>");
                         $("#form")[0].reset();
-                        $("#errorMessage").html("");
+                        cleanForm();
+                        displayUsers(currentPage, undefined, undefined, $("#searchText").val(), $("#genderSelect").val());
                     } else {
                         $("#errorMessage").html(res.error);
                     }
                 }
             }); 
+
+            return false;
         }
     });
     
@@ -88,7 +120,7 @@ $(document).ready(function () {
                 type: "delete",
                 success: function (res) {
                     if (res.status == "success") {
-                        $("."+deleteBtnId).remove();
+                        displayUsers(currentPage, undefined, undefined, $("#searchText").val(), $("#genderSelect").val());
                     } else {
                         $("#errorMessage").html(res.error);
                     }
@@ -120,6 +152,8 @@ $(document).ready(function () {
                         $("#btns").append("<button type='submit' class='btn btn-primary' id='btncancel'>Cancel</button>");
                         $(".edit-btn").attr('disabled',true);
                         $(".delete-btn").attr('disabled',true);
+                        $(".paginationDiv").css("pointer-events", "none");
+                        $(".searchDiv").css("pointer-events", "none");
                     } else {
                         $("#errorMessage").html(res.error);
                     }
@@ -157,15 +191,15 @@ $(document).ready(function () {
                     data: fd,
                     success: function (res) {
                         if (res.status == "success") {
-                            let rowId = updateBtnId;
-                            $("." + rowId).html("");
-                            $("." + rowId).html("<td><img src='/images/" + res.user.profile + "' height='150'></td> <td> " + res.user.name + "</td> <td> " + res.user.gender + "</td> <td> " + res.user.address + "</td> <td> <button class='btn-primary edit-btn' data-id='"+ res.user._id + "'>Edit</button> </td><td> <button class='btn-danger delete-btn' data-id='"+ res.user._id + "'>Delete</button> </td>");
+                            displayUsers(currentPage, undefined, undefined, $("#searchText").val(), $("#genderSelect").val());
                             $("#btncancel").remove();
                             $("#btnupdate").html("Add user").attr("id", "btnsubmit").attr("type", "submit");
                             $("#form")[0].reset();
                             cleanForm();
                             $(".edit-btn").attr('disabled',false);
                             $(".delete-btn").attr('disabled',false);
+                            $(".paginationDiv").css("pointer-events", "all");
+                            $(".searchDiv").css("pointer-events", "all");
                         } else {
                             $("#errorMessage").html(res.error);
                         }
@@ -187,8 +221,45 @@ $(document).ready(function () {
             cleanForm();
             $(".edit-btn").attr('disabled',false);
             $(".delete-btn").attr('disabled',false);
+            $(".paginationDiv").css("pointer-events", "all");
+            $(".searchDiv").css("pointer-events", "all");
         });
+
+    // diaplay users in sorted manner according to feild name and flag
+    $(document).off("click", "a.sort").on("click", "a.sort", function(){
+        let flag = $(this).data("flag");
+        displayUsers(1, $(this).data("feild"), flag, $("#searchText").val(), $("#genderSelect").val());
+        if(flag > 0){
+            $(this).attr("title", "Sort in Descending order")    
+        } else {
+            $(this).attr("title", "Sort in Ascending order")   
+        }
+        $(this).data("flag", Number(flag)*-1);
     });
+
+    // Update global currentPage when clicked accordingly
+    $(document).off("click", "a.page-link").on("click", "a.page-link", function(){
+        currentPage = Number($(this).data("page"));
+        displayUsers(currentPage, undefined, undefined, $("#searchText").val(), $("#genderSelect").val());
+    });
+
+    // Clicked on previous - Decrease current page by 1
+    $(document).off("click", "a.prevPage").on("click", "a.prevPage", function(){
+        currentPage = Number($(".activeBorder").data("page")) - 1;
+        displayUsers(currentPage, undefined, undefined, $("#searchText").val(), $("#genderSelect").val());
+    });
+    
+    // Clicked on next - Increase current page by 1
+    $(document).off("click", "a.nextPage").on("click", "a.nextPage", function(){
+        currentPage = Number($(".activeBorder").data("page")) + 1;
+        displayUsers(currentPage, undefined, undefined, $("#searchText").val(), $("#genderSelect").val());
+    });
+
+    $("#searchBtn").on("click", function(){
+        displayUsers(currentPage, undefined, undefined, $("#searchText").val(), $("#genderSelect").val());
+    });
+
+});
 
 // A function to remove/empty radios, checkboxes and image 
 function cleanForm(){

@@ -1,0 +1,11 @@
+a {
+    text-decoration: none;
+    color: black;
+}
+th {
+    text-align: center;
+}
+
+.activeBorder {
+    border: 2px solid blue;
+}

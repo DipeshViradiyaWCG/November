@@ -16,7 +16,7 @@ exports.addUser = async function(req, res, next){
             addUserObj["profile"] = "profile.jpeg";
         }
         let user = await userModel.create(addUserObj);
-        res.json({status : "success", user : user});
+        res.json({status : "success"});
     } catch (error) {
         console.log(error);
         res.json({status : "error", error : "There was an error while processing your request..."});
@@ -39,6 +39,7 @@ exports.editUserGet = async function (req, res, next) {
     try {
         let user = await userModel.findById(req.params.id);
         res.json({status : "success", user : user});
+       
     } catch (error) {
         console.log(error);
         res.json({status : "error", error : "There was an error while processing your request..."});
@@ -64,5 +65,17 @@ exports.editUserPut = async function (req, res, next) {
     } catch (error) {
         console.log(error);
         res.json({status : "error", error : "There was an error while processing your request..."});
+    }
+};
+
+// Sort users by feild name
+exports.sortUsers = async function(req, res, next){
+    try {
+        // let feild = req.params.feild;
+        let users = await userModel.find({}).sort({[req.params.feild] : req.params.flag});
+        res.json({status : "success", users : users})
+    } catch (error) {
+        console.log(error);
+        res.json({status : "error", error : "There was an error while processing your request..."});    
     }
 };

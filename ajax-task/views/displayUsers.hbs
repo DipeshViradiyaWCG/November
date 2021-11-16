@@ -1,0 +1,43 @@
+<table class="table" id="table">
+    <thead>
+        <tr>
+            <th scope="col">Profile</th>
+            <th scope="col"> <a href="javascript:void(0)" class="sort" data-feild="name" data-flag="1" data-toggle="tooltip" title="Sort in ascending order">Name </a></th> 
+            <th scope="col">Gender </th> 
+            <th scope="col"><a href="javascript:void(0)" class="sort" data-feild="address" data-flag="1" data-toggle="tooltip" title="Sort in ascending order">Address </a></th> 
+            <th scope="col" colspan="2">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each paginatedUsers}}
+            <tr class="{{_id}}">
+                <td><img src="/images/{{profile}}" height="140"></td>
+                <td>{{name}}</td>
+                <td>{{gender}}</td>
+                <td style="width: 45%;">{{address}}</td>
+                <td><button class="btn-primary edit-btn" data-id="{{_id}}">Edit</button></td>
+                <td><button class="btn-danger delete-btn" data-id="{{_id}}">Delete</button></td>
+            </tr>
+        {{/each}}
+    </tbody>
+</table>
+<br>
+<div class="paginationDiv">
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            {{#if prevFlag}}
+                <li class="page-item" id="previousTab"><a class="page-link prevPage" href="javascript:void(0)">Previous</a></li>
+            {{else}}
+                <li class="page-item" id="previousTab"><a class="page-link" href="javascript:void(0)">Previous</a></li>
+            {{/if}}
+            {{#each segmentsArray}}
+                <li class="page-item"><a class="page-link" href="javascript:void(0)" data-page="{{this}}">{{this}}</a></li>
+            {{/each}}
+            {{#if nextFlag}}
+                <li class="page-item"><a class="page-link nextPage" href="javascript:void(0)">Next</a></li>
+            {{else}}
+                <li class="page-item"><a class="page-link" href="javascript:void(0)">Next</a></li>
+            {{/if}}
+        </ul>
+    </nav>
+</div>

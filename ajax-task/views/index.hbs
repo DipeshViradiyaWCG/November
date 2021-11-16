@@ -61,31 +61,29 @@
                     </form>
               </div>
 
-              <div class="col-6">
-                  <table class="table" id="table">
-                    <thead>
-                        <tr>
-                            <th scope="col">Profile</th>
-                            <th scope="col">Name</th>
-                            <th scope="col">Gender</th>
-                            <th scope="col">Address</th>
-                            <th scope="col" colspan="2">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {{#each users}}
-                        <tr class="{{_id}}">
-                            <td><img src="/images/{{profile}}" height="140"></td>
-                            <td>{{name}}</td>
-                            <td>{{gender}}</td>
-                            <td style="width: 45%;">{{address}}</td>
-                            <td><button class="btn-primary edit-btn" data-id="{{_id}}">Edit</button></td>
-                            <td><button class="btn-danger delete-btn" data-id="{{_id}}">Delete</button></td>
-                        </tr>
-                        {{/each}}
-                    </tbody>
-                </table>
-              </div>
+                <div class="col-6">
+                    <div class="searchDiv">
+                        <div class="input-group">
+                            <div class="form-outline">
+                                <input type="search" id="searchText" name="searchText" class="form-control" placeholder="Search"/>
+                            </div>&nbsp;&nbsp;&nbsp;
+                                <select name="genderSelect" id="genderSelect">
+                                    <option value="all" selected>All</option>
+                                    <option value="male">Male</option>
+                                    <option value="female">Female</option>
+                                </select>&nbsp;&nbsp;&nbsp;
+                            <button type="button" id="searchBtn" class="btn btn-primary">
+                                <i class="fa fa-search">Go</i>
+                            </button>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="display-users">
+
+                    </div>
+                </div>
+                
+              </div> 
           </div>
       </div>
 
