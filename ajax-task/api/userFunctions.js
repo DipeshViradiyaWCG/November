@@ -60,7 +60,6 @@ exports.editUserPut = async function (req, res, next) {
             updateUserObj["profile"] = req.file.filename;
         }
         let user = await userModel.findByIdAndUpdate(req.params.id, updateUserObj, {new : true});
-        console.log("updated user", user);
         res.json({status : "success", user : user});
     } catch (error) {
         console.log(error);

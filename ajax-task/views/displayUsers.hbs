@@ -25,19 +25,23 @@
 <div class="paginationDiv">
     <nav aria-label="Page navigation example">
         <ul class="pagination">
+
             {{#if prevFlag}}
-                <li class="page-item" id="previousTab"><a class="page-link prevPage" href="javascript:void(0)">Previous</a></li>
+                <li class="page-item" id="previousTab"><a class="page-link prevPage" data-qs="{{qs}}" data-url="{{currentUrl}}" href="javascript:void(0)">Previous</a></li>
             {{else}}
-                <li class="page-item" id="previousTab"><a class="page-link" href="javascript:void(0)">Previous</a></li>
+                <li class="page-item" id="previousTab" style="pointer-events: none; opacity : 0.7;"><a class="page-link prevPage" href="javascript:void(0)" style="color: black;" data-qs="{{qs}}" data-currenturl="{{currentUrl}}">Previous</a></li>
             {{/if}}
+
             {{#each segmentsArray}}
-                <li class="page-item"><a class="page-link" href="javascript:void(0)" data-page="{{this}}">{{this}}</a></li>
+                <li class="page-item"><a class="page-link pageClass" href="javascript:void(0)" data-page="{{this}}" data-qs="{{../qs}}">{{this}}</a></li>
             {{/each}}
+
             {{#if nextFlag}}
-                <li class="page-item"><a class="page-link nextPage" href="javascript:void(0)">Next</a></li>
+                <li class="page-item"><a class="page-link nextPage" href="javascript:void(0)" data-currenturl="{{currentUrl}}">Next</a></li>
             {{else}}
-                <li class="page-item"><a class="page-link" href="javascript:void(0)">Next</a></li>
+                <li class="page-item" style="pointer-events: none; opacity : 0.7;"><a class="page-link" href="javascript:void(0)" style="color: black;" data-qs="{{qs}}" data-currenturl="{{currentUrl}}">Next</a></li>
             {{/if}}
+
         </ul>
     </nav>
 </div>

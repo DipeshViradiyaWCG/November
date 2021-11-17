@@ -2,6 +2,25 @@ let currentPage = 1;
 $(document).ready(function () {
 
     /**
+     * A Function to convert query string to object - client side
+     */
+    var re = /([^&=]+)=?([^&]*)/g;
+    var decodeRE = /\+/g;  // Regex for replacing addition symbol with a space
+    var decode = function (str) {return decodeURIComponent( str.replace(decodeRE, " ") );};
+    $.parseParams = function(query) {
+        var params = {}, e;
+        while ( e = re.exec(query) ) { 
+            var k = decode( e[1] ), v = decode( e[2] );
+            if (k.substring(k.length - 2) === '[]') {
+                k = k.substring(0, k.length - 2);
+                (params[k] || (params[k] = [])).push(v);
+            }
+            else params[k] = v;
+        }
+        return params;
+    };
+
+    /**
      * 
      * @param {Active page number when requested on ajax} currentPage 
      * @param {feild name to sort} feild optional
@@ -10,28 +29,55 @@ $(document).ready(function () {
      * function to display users data in paginated manner
      */
 
-    function displayUsers(currentPage, feild, flag, searchText, searchGender){
-        // console.log(typeof searchText,"     ", searchText.length);
-        if(searchText.length == 0)
-            searchText = "undefined";
+    function displayUsers(currentPage, sortingQuery, searchText, searchGender, exportOps){
+
+        let queryURL = "/displayUsers?currentPage=" + currentPage;
+        if(sortingQuery != undefined && sortingQuery.length > 0)
+            queryURL += "&" + sortingQuery;
+
+        if(searchText.length != 0)
+            queryURL += "&searchText=" + searchText;
+            
+        if(searchGender != undefined)
+            queryURL += "&searchGender=" + searchGender;
+        
+        if(exportOps){
+            if(exportOps.exportFlag)
+                queryURL += "&exportFlag=" + exportOps.exportFlag;
+            if(exportOps.exportEmailFlag)
+                queryURL += "&exportEmailFlag=" + exportOps.exportEmailFlag + "&exportEmail=" + exportOps.exportEmail;
+
+        }
+        
         $.ajax({
-            url: "/displayUsers/" + currentPage + "/" + feild + "/" + flag + "/" + searchText + "/" + searchGender,
+            url: queryURL,
             type: "get",
             success: function (res) {
-                $('.display-users').html(res);
-                $("a[data-page='"+currentPage+"']").addClass("activeBorder");
-                if(flag){
-                    if(flag > 0){
-                        $("a.sort").attr("title", "Sort in Descending order")    
+                if(exportOps && exportOps.exportFlag){
+                    if(exportOps.exportEmailFlag){
+                        console.log("email sent");
                     } else {
-                        $("a.sort").attr("title", "Sort in Ascending order")   
+                        $("body").append("<a href='"+ res.downloadUrl +"' download='users.csv' id='downloadLink'></a>");
+                        $("#downloadLink")[0].click();
+                        $("#downloadLink").remove();
                     }
-                    $("a.sort").data("flag", Number(flag)*-1);
+                }else{
+                    $('.display-users').html(res);
+                    if(searchText.length != 0 || searchGender){
+                        currentPage = 1;   
+                    }
+                    $("a[data-page='"+currentPage+"']").addClass("activeBorder");
+                    if($.parseParams(sortingQuery).flag > 0){
+                        $("a.sort[data-feild='"+ $.parseParams(sortingQuery).feild +"']").attr("title", "Sort in Descending order");
+                    } else {
+                        $("a.sort[data-feild='"+ $.parseParams(sortingQuery).feild +"']").attr("title", "Sort in Ascending order"); 
+                    }
+                    $("a.sort[data-feild='"+ $.parseParams(sortingQuery).feild +"']").data("flag", Number($.parseParams(sortingQuery).flag)*-1);
                 }
             }
         }); 
     }
-    displayUsers(currentPage, undefined, undefined, $("#searchText").val(), $("#genderSelect").val());
+    displayUsers(currentPage, "", $("#searchText").val(), $("#genderSelect").val());
 
     // Validate form
     $("#form").validate({
@@ -100,7 +146,8 @@ $(document).ready(function () {
                     if (res.status == "success") {
                         $("#form")[0].reset();
                         cleanForm();
-                        displayUsers(currentPage, undefined, undefined, $("#searchText").val(), $("#genderSelect").val());
+                        let qs = $("a.prevPage").data("qs");
+                        displayUsers(currentPage, qs, $("#searchText").val(), $("#genderSelect").val());
                     } else {
                         $("#errorMessage").html(res.error);
                     }
@@ -120,7 +167,8 @@ $(document).ready(function () {
                 type: "delete",
                 success: function (res) {
                     if (res.status == "success") {
-                        displayUsers(currentPage, undefined, undefined, $("#searchText").val(), $("#genderSelect").val());
+                        let qs = $("a.prevPage").data("qs");
+                        displayUsers(currentPage, qs, $("#searchText").val(), $("#genderSelect").val());
                     } else {
                         $("#errorMessage").html(res.error);
                     }
@@ -191,7 +239,8 @@ $(document).ready(function () {
                     data: fd,
                     success: function (res) {
                         if (res.status == "success") {
-                            displayUsers(currentPage, undefined, undefined, $("#searchText").val(), $("#genderSelect").val());
+                            let qs = $("a.prevPage").data("qs");
+                            displayUsers(currentPage, qs, $("#searchText").val(), $("#genderSelect").val());
                             $("#btncancel").remove();
                             $("#btnupdate").html("Add user").attr("id", "btnsubmit").attr("type", "submit");
                             $("#form")[0].reset();
@@ -228,7 +277,8 @@ $(document).ready(function () {
     // diaplay users in sorted manner according to feild name and flag
     $(document).off("click", "a.sort").on("click", "a.sort", function(){
         let flag = $(this).data("flag");
-        displayUsers(1, $(this).data("feild"), flag, $("#searchText").val(), $("#genderSelect").val());
+        let qs = "feild=" + $(this).data("feild") + "&flag=" + $(this).data("flag");
+        displayUsers(1, qs, $("#searchText").val(), $("#genderSelect").val());
         if(flag > 0){
             $(this).attr("title", "Sort in Descending order")    
         } else {
@@ -240,23 +290,44 @@ $(document).ready(function () {
     // Update global currentPage when clicked accordingly
     $(document).off("click", "a.page-link").on("click", "a.page-link", function(){
         currentPage = Number($(this).data("page"));
-        displayUsers(currentPage, undefined, undefined, $("#searchText").val(), $("#genderSelect").val());
+        let qs= $(this).data('qs');
+        displayUsers(currentPage, qs, $("#searchText").val(), $("#genderSelect").val());
     });
 
     // Clicked on previous - Decrease current page by 1
     $(document).off("click", "a.prevPage").on("click", "a.prevPage", function(){
         currentPage = Number($(".activeBorder").data("page")) - 1;
-        displayUsers(currentPage, undefined, undefined, $("#searchText").val(), $("#genderSelect").val());
+        let qs= $(this).data('qs');
+        displayUsers(currentPage, qs, $("#searchText").val(), $("#genderSelect").val());
     });
     
     // Clicked on next - Increase current page by 1
     $(document).off("click", "a.nextPage").on("click", "a.nextPage", function(){
         currentPage = Number($(".activeBorder").data("page")) + 1;
-        displayUsers(currentPage, undefined, undefined, $("#searchText").val(), $("#genderSelect").val());
+        let qs= $(this).data('qs');
+        displayUsers(currentPage, qs, $("#searchText").val(), $("#genderSelect").val());
     });
 
+    // Clicked on search button - request to search data through ajax
     $("#searchBtn").on("click", function(){
-        displayUsers(currentPage, undefined, undefined, $("#searchText").val(), $("#genderSelect").val());
+        currentPage = Number($(".activeBorder").data("page")) + 1;
+        let qs = $("a.prevPage").data("qs");
+        displayUsers(currentPage, qs, $("#searchText").val(), $("#genderSelect").val());
+    });
+
+    // Export csv file of data and download
+    $("#exportBtn").on("click", function(){
+        currentPage = Number($(".activeBorder").data("page")) + 1;
+        let qs = $("a.prevPage").data("qs");
+        displayUsers(currentPage, qs, $("#searchText").val(), $("#genderSelect").val(), {exportFlag : true});
+    });
+
+    // Request a link for csv file download on email
+    $("#exportEmailBtn").on("click", function(){
+        currentPage = Number($(".activeBorder").data("page")) + 1;
+        let qs = $("a.prevPage").data("qs");
+        let reqEmail = prompt("Enter your email");
+        displayUsers(currentPage, qs, $("#searchText").val(), $("#genderSelect").val(), {exportFlag : true, exportEmailFlag : true, exportEmail : reqEmail});
     });
 
 });

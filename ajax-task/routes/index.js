@@ -23,12 +23,13 @@ const upload = multer({
 // routes
 router.get('/', showUsers);
 router.post('/', upload.single("profile"), addUser);
+router.get("/abcd", async (req, res, next) => {
+  res.download("public/csvFiles/file.csv");
+});
+router.get("/displayUsers", displayUsers);
 router.get('/:id', editUserGet);
 router.put('/:id',upload.single("profile"), editUserPut);
 router.delete('/:id', deleteUser);
 
-router.get("/displayUsers/:currentPage/:feild/:flag/:searchText/:searchGender",displayUsers);
-
-// router.get('/sort/:feild/:flag', sortUsers);
 
 module.exports = router;
