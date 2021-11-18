@@ -29,7 +29,7 @@ $(document).ready(function () {
      * function to display users data in paginated manner
      */
 
-    function displayUsers(currentPage, sortingQuery, searchText, searchGender, exportOps){
+    function displayUsers(currentPage, sortingQuery, searchText, searchGender, exportOps, redirectFlag){
 
         let queryURL = "/displayUsers?currentPage=" + currentPage;
         if(sortingQuery != undefined && sortingQuery.length > 0)
@@ -48,6 +48,9 @@ $(document).ready(function () {
                 queryURL += "&exportEmailFlag=" + exportOps.exportEmailFlag + "&exportEmail=" + exportOps.exportEmail;
 
         }
+
+        if(redirectFlag)
+            queryURL += "&redirectFlag=" + redirectFlag.redirectFlag;
         
         $.ajax({
             url: queryURL,
@@ -55,24 +58,26 @@ $(document).ready(function () {
             success: function (res) {
                 if(exportOps && exportOps.exportFlag){
                     if(exportOps.exportEmailFlag){
-                        console.log("email sent");
+                        $("#emailMessage").html("Email sent succesfully...");
                     } else {
-                        $("body").append("<a href='"+ res.downloadUrl +"' download='users.csv' id='downloadLink'></a>");
+                        $("body").append("<a href='"+ res.downloadUrl +"' id='downloadLink'></a>");
                         $("#downloadLink")[0].click();
                         $("#downloadLink").remove();
                     }
                 }else{
                     $('.display-users').html(res);
-                    if(searchText.length != 0 || searchGender){
-                        currentPage = 1;   
+                    console.log("res.currentPage", res.currentPage);
+                    if(searchText.length || searchGender){
+                        // currentPage = 1;   
                     }
-                    $("a[data-page='"+currentPage+"']").addClass("activeBorder");
+                    $("a[data-page='"+res.currentPage+"']").addClass("activeBorder");
                     if($.parseParams(sortingQuery).flag > 0){
                         $("a.sort[data-feild='"+ $.parseParams(sortingQuery).feild +"']").attr("title", "Sort in Descending order");
                     } else {
                         $("a.sort[data-feild='"+ $.parseParams(sortingQuery).feild +"']").attr("title", "Sort in Ascending order"); 
                     }
                     $("a.sort[data-feild='"+ $.parseParams(sortingQuery).feild +"']").data("flag", Number($.parseParams(sortingQuery).flag)*-1);
+                    $("#emailMessage").html("");
                 }
             }
         }); 
@@ -162,6 +167,11 @@ $(document).ready(function () {
     $(document).off("click", ".delete-btn")
         .on("click", ".delete-btn", function(){
             let deleteBtnId = $(this).data("id");
+
+
+            
+
+
             $.ajax({
                 url: "/" + deleteBtnId + "",
                 type: "delete",
@@ -310,25 +320,37 @@ $(document).ready(function () {
 
     // Clicked on search button - request to search data through ajax
     $("#searchBtn").on("click", function(){
-        currentPage = Number($(".activeBorder").data("page")) + 1;
+        currentPage = Number($(".activeBorder").data("page"));
         let qs = $("a.prevPage").data("qs");
-        displayUsers(currentPage, qs, $("#searchText").val(), $("#genderSelect").val());
+        displayUsers(currentPage, qs, $("#searchText").val(), $("#genderSelect").val(), {}, {redirectToFirstPage : true});
     });
 
     // Export csv file of data and download
-    $("#exportBtn").on("click", function(){
-        currentPage = Number($(".activeBorder").data("page")) + 1;
+    $(document).off("click", "#exportBtn").on("click", "#exportBtn", function(){
+        currentPage = Number($(".activeBorder").data("page"));
         let qs = $("a.prevPage").data("qs");
         displayUsers(currentPage, qs, $("#searchText").val(), $("#genderSelect").val(), {exportFlag : true});
     });
 
     // Request a link for csv file download on email
-    $("#exportEmailBtn").on("click", function(){
-        currentPage = Number($(".activeBorder").data("page")) + 1;
+    $(document).off("click", "#exportEmailBtn").on("click", "#exportEmailBtn", function(){
+        currentPage = Number($(".activeBorder").data("page"));
         let qs = $("a.prevPage").data("qs");
         let reqEmail = prompt("Enter your email");
-        displayUsers(currentPage, qs, $("#searchText").val(), $("#genderSelect").val(), {exportFlag : true, exportEmailFlag : true, exportEmail : reqEmail});
+    
+        let emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+        if(reqEmail.length > 0 && emailReg.test(reqEmail)){
+            displayUsers(currentPage, qs, $("#searchText").val(), $("#genderSelect").val(), {exportFlag : true, exportEmailFlag : true, exportEmail : reqEmail});
+        }else {
+            $("#errorMessage").html("Invalid email 6");        
+        }
     });
+
+    // $("#exportBtn").on("click", function(){
+    // });
+
+    // $("#exportEmailBtn").on("click", function(){
+    // });
 
 });
 

@@ -5,6 +5,9 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const hbs = require("express-handlebars");
 
+const moment = require("moment");
+process.env.TZ = "UTC";
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
@@ -27,7 +30,11 @@ app.engine(
   "hbs",
   hbs({
     extname: "hbs",
-    defaultLayout: false
+    defaultLayout: false,
+    helpers:{
+      "convertUTCtoIST":(UTCtime) => moment(UTCtime).utcOffset("+05:30").format("YYYY-MM-DD LT"),
+      "compare" : (a, b) => a == b ? true : false
+    }
   })
 );
 

@@ -9,6 +9,9 @@ let userSchema = mongoose.Schema({
         type: String
     }],
     profile : String
-});
+}, { timestamps: true } );
 
+userSchema.virtual('fullname').get(function() {
+    return this.name + this.gender;
+  });
 module.exports = mongoose.model("users", userSchema);

@@ -1,7 +1,8 @@
 const userModel = require("../models/users");
 const { Parser } = require('json2csv');
 const fs = require('fs')
-const { getClientIp } = require('@supercharge/request-ip')
+// const { getClientIp } = require('@supercharge/request-ip')
+const moment = require("moment");
 const nodemailer = require("nodemailer");
 
 
@@ -36,19 +37,22 @@ exports.displayUsers = async function(req, res, next){
             currentPage = 1;
         }
         
-        if(req.query.searchGender != "all"){
+        if(req.query.searchGender != "all")
             findCondition["gender"] = req.query.searchGender;
-            currentPage = 1;
-        }
-        
+
         if(req.query.feild){
             currentUrl["feild"] = req.query.feild;
             currentUrl["flag"] = req.query.flag;
             sortCondition[req.query.feild] = req.query.flag;
         }
+
+        if(req.query.redirectFlag){
+            console.log(req.query.redirectFlag);
+            currentPage = 1;
+        }
         
         if(req.query.exportFlag){
-            paginatedUsers = await userModel.find( findCondition, {name : 1, address : 1, gender : 1, state : 1, hobby : 1,_id:0}).sort(sortCondition).lean();    
+            paginatedUsers = await userModel.find( findCondition, {name : 1, address : 1, gender : 1, state : 1, hobby : 1, _id : 0, createdAt : 1}).sort(sortCondition).lean();    
             for(let user of paginatedUsers){
                 user["hobby"] = user["hobby"].join(",");
             }
@@ -68,12 +72,16 @@ exports.displayUsers = async function(req, res, next){
             },{
                 label:"Hobby",
                 value:"hobby"
+            },{
+                label:"Created at",
+                value: (row) => moment(row.createdAt).utcOffset("+05:30").format("YYYY-MM-DD HH:mm a")
             }]
 
             const json2csvParser = new Parser({ fields});
             const csvData = json2csvParser.parse(paginatedUsers);
 
-            let fileName = "D-" + getClientIp(req) + "-" + Date.now() + ".csv";
+            // let fileName = "D-" + getClientIp(req) + "-" + Date.now() + ".csv";
+            let fileName = "Users-" + moment().format('YYYY-MM-DD hh:mm') + ".csv";
             fs.writeFile("public/csvFiles/" + fileName, csvData, (err, data) => {
                 if(err) throw err;
                 console.log("file created");
@@ -104,7 +112,8 @@ exports.displayUsers = async function(req, res, next){
                         }
                     });
                 }
-                res.json({status : "success", downloadUrl : "http://192.168.1.112:3000/csvFiles/" + fileName})
+                console.log(fileName);
+                res.json({status : "success", downloadUrl : "http://192.168.1.112:3000/csvFiles/" + fileName, fileName})
             });
             return;
         }
@@ -115,16 +124,16 @@ exports.displayUsers = async function(req, res, next){
         let prevFlag = true;
         let nextFlag = true;
         if(Number(currentPage) == 1)
-        prevFlag = false;
+            prevFlag = false;
         if (Number(currentPage) == Math.ceil(usersLength/3))
-        nextFlag = false;
+            nextFlag = false;
         
         const qs = Object.keys(currentUrl)
         .map(key => `${key}=${currentUrl[key]}`)
         .join('&');
     
-        // console.log("paginatedUsers", paginatedUsers);
-        res.render("displayUsers", {paginatedUsers : paginatedUsers, prevFlag, nextFlag, currentUrl : JSON.stringify(currentUrl),qs:qs, segmentsArray : Array.from({length: Math.ceil(usersLength/3)}, (_, i) => i + 1)} );
+        console.log("paginatedUsers", paginatedUsers);
+        res.render("displayUsers", {paginatedUsers : paginatedUsers, prevFlag, nextFlag, currentPage, currentUrl : JSON.stringify(currentUrl),qs:qs, segmentsArray : Array.from({length: Math.ceil(usersLength/3)}, (_, i) => i + 1)} );
         
     } catch (error) {
         console.log(error);

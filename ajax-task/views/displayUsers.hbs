@@ -5,6 +5,7 @@
             <th scope="col"> <a href="javascript:void(0)" class="sort" data-feild="name" data-flag="1" data-toggle="tooltip" title="Sort in ascending order">Name </a></th> 
             <th scope="col">Gender </th> 
             <th scope="col"><a href="javascript:void(0)" class="sort" data-feild="address" data-flag="1" data-toggle="tooltip" title="Sort in ascending order">Address </a></th> 
+            <th scope="col"><a href="javascript:void(0)" class="sort" data-feild="createdAt" data-flag="1" data-toggle="tooltip" title="Sort in ascending order">Record Created at </a></th> 
             <th scope="col" colspan="2">Actions</th>
         </tr>
     </thead>
@@ -15,6 +16,7 @@
                 <td>{{name}}</td>
                 <td>{{gender}}</td>
                 <td style="width: 45%;">{{address}}</td>
+                <td>{{convertUTCtoIST createdAt}}</td>
                 <td><button class="btn-primary edit-btn" data-id="{{_id}}">Edit</button></td>
                 <td><button class="btn-danger delete-btn" data-id="{{_id}}">Delete</button></td>
             </tr>
@@ -33,7 +35,11 @@
             {{/if}}
 
             {{#each segmentsArray}}
-                <li class="page-item"><a class="page-link pageClass" href="javascript:void(0)" data-page="{{this}}" data-qs="{{../qs}}">{{this}}</a></li>
+                {{#if (compare this ../currentPage)}}
+                    <li class="page-item"><a class="page-link pageClass activeBorder" href="javascript:void(0)" data-page="{{this}}" data-qs="{{../qs}}">{{this}}</a></li>
+                {{else}}
+                    <li class="page-item"><a class="page-link pageClass" href="javascript:void(0)" data-page="{{this}}" data-qs="{{../qs}}">{{this}}</a></li>
+                {{/if}}
             {{/each}}
 
             {{#if nextFlag}}
@@ -44,4 +50,9 @@
 
         </ul>
     </nav>
+</div>
+<div class="exportDiv">
+    <a href="javascript:void(0)" class="btn btn-primary" id="exportBtn">Export to csv</a>&nbsp;&nbsp;
+    <a href="javascript:void(0)" class="btn btn-primary" id="exportEmailBtn">Request an email for csv</a>
+    <p id="emailMessage" class="text-primary"></p>
 </div>

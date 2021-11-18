@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
     <link rel="stylesheet" href="/stylesheets/style.css">
 
+    <!-- Jquery confirm CSS -->
+    <link rel="stylesheet" href="/stylesheets/jquery-confirm.css">
+
     <title>Ajax task</title>
   </head>
   <body>
@@ -81,8 +84,9 @@
                     <div class="display-users">
 
                     </div>
-                    <a href="javascript:void(0)" class="btn btn-primary" id="exportBtn">Export to csv</a>&nbsp;&nbsp;
+                    {{!-- <a href="javascript:void(0)" class="btn btn-primary" id="exportBtn">Export to csv</a>&nbsp;&nbsp;
                     <a href="javascript:void(0)" class="btn btn-primary" id="exportEmailBtn">Request an email for csv</a>
+                    <p id="emailMessage" class="text-primary"></p> --}}
                 </div>
               </div> 
           </div>
@@ -94,6 +98,7 @@
     {{!-- jQuery --}}
     <script src="/javascripts/jquery.js"></script>
     <script src="/javascripts/jquery-validate.js"></script>
+    <script src="/javascripts/jquery-confirm.js"></script>
 
     {{!-- local javascript file --}}
     <script src="/javascripts/ajax.js"></script>
