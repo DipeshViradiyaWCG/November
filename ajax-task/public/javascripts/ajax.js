@@ -66,10 +66,6 @@ $(document).ready(function () {
                     }
                 }else{
                     $('.display-users').html(res);
-                    console.log("res.currentPage", res.currentPage);
-                    if(searchText.length || searchGender){
-                        // currentPage = 1;   
-                    }
                     $("a[data-page='"+res.currentPage+"']").addClass("activeBorder");
                     if($.parseParams(sortingQuery).flag > 0){
                         $("a.sort[data-feild='"+ $.parseParams(sortingQuery).feild +"']").attr("title", "Sort in Descending order");
@@ -167,23 +163,29 @@ $(document).ready(function () {
     $(document).off("click", ".delete-btn")
         .on("click", ".delete-btn", function(){
             let deleteBtnId = $(this).data("id");
-
-
-            
-
-
-            $.ajax({
-                url: "/" + deleteBtnId + "",
-                type: "delete",
-                success: function (res) {
-                    if (res.status == "success") {
-                        let qs = $("a.prevPage").data("qs");
-                        displayUsers(currentPage, qs, $("#searchText").val(), $("#genderSelect").val());
-                    } else {
-                        $("#errorMessage").html(res.error);
+            $.confirm({
+                title: 'Confirm!',
+                content: 'Simple confirm!',
+                buttons: {
+                    confirm: function () {
+                        $.ajax({
+                            url: "/" + deleteBtnId + "",
+                            type: "delete",
+                            success: function (res) {
+                                if (res.status == "success") {
+                                    let qs = $("a.prevPage").data("qs");
+                                    displayUsers(currentPage, qs, $("#searchText").val(), $("#genderSelect").val());
+                                } else {
+                                    $("#errorMessage").html(res.error);
+                                }
+                            }
+                        }); 
+                    },
+                    cancel: function () {
+                        return;
                     }
                 }
-            }); 
+            });
         });
 
     // Render user data in form for editing
@@ -284,7 +286,7 @@ $(document).ready(function () {
             $(".searchDiv").css("pointer-events", "all");
         });
 
-    // diaplay users in sorted manner according to feild name and flag
+    // display users in sorted manner according to feild name and flag
     $(document).off("click", "a.sort").on("click", "a.sort", function(){
         let flag = $(this).data("flag");
         let qs = "feild=" + $(this).data("feild") + "&flag=" + $(this).data("flag");
@@ -345,12 +347,6 @@ $(document).ready(function () {
             $("#errorMessage").html("Invalid email 6");        
         }
     });
-
-    // $("#exportBtn").on("click", function(){
-    // });
-
-    // $("#exportEmailBtn").on("click", function(){
-    // });
 
 });
 

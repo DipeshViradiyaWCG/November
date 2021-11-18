@@ -1,7 +1,6 @@
 const userModel = require("../models/users");
 const { Parser } = require('json2csv');
 const fs = require('fs')
-// const { getClientIp } = require('@supercharge/request-ip')
 const moment = require("moment");
 const nodemailer = require("nodemailer");
 
@@ -18,10 +17,8 @@ exports.showUsers = async function(req, res, next){
 
 // Display users in sorted or non sorted manner and process search query as requirement
 exports.displayUsers = async function(req, res, next){
-    console.log(req.query);
     try {
         let currentPage = req.query.currentPage;
-        console.log("currentPage", currentPage);
         let paginatedUsers;
         let usersLength;
         
@@ -47,10 +44,10 @@ exports.displayUsers = async function(req, res, next){
         }
 
         if(req.query.redirectFlag){
-            console.log(req.query.redirectFlag);
             currentPage = 1;
         }
         
+        // Create a csv file and send a link to download / to mail user
         if(req.query.exportFlag){
             paginatedUsers = await userModel.find( findCondition, {name : 1, address : 1, gender : 1, state : 1, hobby : 1, _id : 0, createdAt : 1}).sort(sortCondition).lean();    
             for(let user of paginatedUsers){
@@ -80,7 +77,6 @@ exports.displayUsers = async function(req, res, next){
             const json2csvParser = new Parser({ fields});
             const csvData = json2csvParser.parse(paginatedUsers);
 
-            // let fileName = "D-" + getClientIp(req) + "-" + Date.now() + ".csv";
             let fileName = "Users-" + moment().format('YYYY-MM-DD hh:mm') + ".csv";
             fs.writeFile("public/csvFiles/" + fileName, csvData, (err, data) => {
                 if(err) throw err;
@@ -131,9 +127,15 @@ exports.displayUsers = async function(req, res, next){
         const qs = Object.keys(currentUrl)
         .map(key => `${key}=${currentUrl[key]}`)
         .join('&');
-    
-        console.log("paginatedUsers", paginatedUsers);
-        res.render("displayUsers", {paginatedUsers : paginatedUsers, prevFlag, nextFlag, currentPage, currentUrl : JSON.stringify(currentUrl),qs:qs, segmentsArray : Array.from({length: Math.ceil(usersLength/3)}, (_, i) => i + 1)} );
+
+        res.render("displayUsers", {
+            paginatedUsers, 
+            prevFlag, 
+            nextFlag, 
+            currentPage, 
+            currentUrl : JSON.stringify(currentUrl),
+            qs:qs,
+            segmentsArray : Array.from({length: Math.ceil(usersLength/3)}, (_, i) => i + 1)} );
         
     } catch (error) {
         console.log(error);

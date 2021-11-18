@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 // API functions and controllers
-const { addUser , deleteUser, editUserGet, editUserPut, sortUsers } = require('../api/userFunctions');
+const { addUser , deleteUser, editUserGet, editUserPut } = require('../api/userFunctions');
 const { showUsers, displayUsers} = require('../controllers/userController');
 
 // Multer initialization for file upload
@@ -23,10 +23,8 @@ const upload = multer({
 // routes
 router.get('/', showUsers);
 router.post('/', upload.single("profile"), addUser);
-router.get("/abcd", async (req, res, next) => {
-  res.download("public/csvFiles/file.csv");
-});
-router.get("/displayUsers", displayUsers);
+router.get('/displayUsers', displayUsers);
+
 router.get('/:id', editUserGet);
 router.put('/:id',upload.single("profile"), editUserPut);
 router.delete('/:id', deleteUser);

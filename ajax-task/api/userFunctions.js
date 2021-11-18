@@ -15,7 +15,7 @@ exports.addUser = async function(req, res, next){
         } else {
             addUserObj["profile"] = "profile.jpeg";
         }
-        let user = await userModel.create(addUserObj);
+        await userModel.create(addUserObj);
         res.json({status : "success"});
     } catch (error) {
         console.log(error);

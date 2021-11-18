@@ -11,7 +11,4 @@ let userSchema = mongoose.Schema({
     profile : String
 }, { timestamps: true } );
 
-userSchema.virtual('fullname').get(function() {
-    return this.name + this.gender;
-  });
 module.exports = mongoose.model("users", userSchema);

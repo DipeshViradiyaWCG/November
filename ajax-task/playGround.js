@@ -73,5 +73,8 @@ db.getCollection('minipcategories').aggregate([{$looup : {
     from : "minipsubcategories",
     localField : "_id",
     foreignField : "_category" ,
+    pipeline: [{$project : {
+        
+    }}],
     as : "subcategories",
 }}])
