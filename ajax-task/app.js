@@ -8,11 +8,16 @@ const hbs = require("express-handlebars");
 const moment = require("moment");
 process.env.TZ = "UTC";
 
+var CronJob = require('cron').CronJob;
+const emailScheduleModel = require("./models/emailSchedule");
+const { sendMailService } = require('./services/sendMailService');
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
 // DB Code
 var mongoose = require('mongoose');
+const emailSchedule = require('./models/emailSchedule');
 mongoose.connect(
   "mongodb://admin:admin@localhost:27017/ajax-pro").then(
     () => {console.log("Connected");}
@@ -43,6 +48,28 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Entertain one mail request at every minute 
+var job = new CronJob(
+	'* * * * *',
+	async function() {
+		try {
+      let emailsToSend = await emailScheduleModel.find({status : 0}).lean();
+      if(emailsToSend.length > 0){
+        sendMailService(emailsToSend[0].receiverEmail, emailsToSend[0].receiverEmailText);  
+        await emailScheduleModel.updateOne({status : 0}, {status : 1});
+      }
+    } catch (error) {
+      console.log(error);
+    }
+	},
+	null,
+	true,
+	'America/Los_Angeles'
+);
+
+job.start();
+
 
 app.use('/', indexRouter);
 app.use('/users', usersRouter);

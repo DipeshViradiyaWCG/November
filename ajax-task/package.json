@@ -8,6 +8,7 @@
   "dependencies": {
     "@supercharge/request-ip": "^1.1.2",
     "cookie-parser": "~1.4.4",
+    "cron": "^1.8.2",
     "debug": "~2.6.9",
     "express": "~4.16.1",
     "express-handlebars": "^5.3.4",

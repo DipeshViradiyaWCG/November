@@ -22,11 +22,12 @@ $(document).ready(function () {
 
     /**
      * 
-     * @param {Active page number when requested on ajax} currentPage 
-     * @param {feild name to sort} feild optional
-     * @param {sorting flag} flag optional
-     * 
-     * function to display users data in paginated manner
+     * @param {current active page} currentPage 
+     * @param {sorting feild and flag query string} sortingQuery 
+     * @param {text to search in users data} searchText 
+     * @param {search gender} searchGender 
+     * @param {file export options - exportFlag, exportEmailFlag, exportEmail} exportOps 
+     * @param {boolean to whether redirect the current active page to first page or not} redirectFlag 
      */
 
     function displayUsers(currentPage, sortingQuery, searchText, searchGender, exportOps, redirectFlag){
@@ -46,7 +47,6 @@ $(document).ready(function () {
                 queryURL += "&exportFlag=" + exportOps.exportFlag;
             if(exportOps.exportEmailFlag)
                 queryURL += "&exportEmailFlag=" + exportOps.exportEmailFlag + "&exportEmail=" + exportOps.exportEmail;
-
         }
 
         if(redirectFlag)
@@ -58,7 +58,7 @@ $(document).ready(function () {
             success: function (res) {
                 if(exportOps && exportOps.exportFlag){
                     if(exportOps.exportEmailFlag){
-                        $("#emailMessage").html("Email sent succesfully...");
+                        $("#emailMessage").html("Your request for csv file link has been registered succesfully...");
                     } else {
                         $("body").append("<a href='"+ res.downloadUrl +"' id='downloadLink'></a>");
                         $("#downloadLink")[0].click();

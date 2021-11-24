@@ -1,8 +1,10 @@
 const userModel = require("../models/users");
+const emailScheduleModel = require("../models/emailSchedule");
 const { Parser } = require('json2csv');
 const fs = require('fs')
 const moment = require("moment");
 const nodemailer = require("nodemailer");
+const { sendMailService } = require("../services/sendMailService");
 
 
 // Show users from database
@@ -78,35 +80,56 @@ exports.displayUsers = async function(req, res, next){
             const csvData = json2csvParser.parse(paginatedUsers);
 
             let fileName = "Users-" + moment().format('YYYY-MM-DD hh:mm') + ".csv";
-            fs.writeFile("public/csvFiles/" + fileName, csvData, (err, data) => {
+            fs.writeFile("public/csvFiles/" + fileName, csvData, async (err, data) => {
                 if(err) throw err;
                 console.log("file created");
                 if(req.query.exportEmailFlag){
-                    let transporter = nodemailer.createTransport({
-                        service: "gmail",
-                        auth: {
-                          user: "ravi.malaviya.3795@gmail.com", // generated ethereal user
-                          pass: "ravi@3795", // generated ethereal password
-                        },
-                      });
+                    // let transporter = nodemailer.createTransport({
+                    //     service: "gmail",
+                    //     auth: {
+                    //       user: "ravi.malaviya.3795@gmail.com", // generated ethereal user
+                    //       pass: "ravi@3795", // generated ethereal password
+                    //     },
+                    //   });
                     
-                      var mailOptions = {
-                        from: '"Dipesh\'s fake account" <dipesh.fakemail@gmail.com>',
-                        to: req.query.exportEmail,
-                        subject: "A link to download requested CSV file",
-                        text : "http://192.168.1.112:3000/csvFiles/" + fileName
-                      };
+                    //   var mailOptions = {
+                    //     from: '"Dipesh\'s fake account" <dipesh.fakemail@gmail.com>',
+                    //     to: req.query.exportEmail,
+                    //     subject: "A link to download requested CSV file",
+                    //     text : "http://192.168.1.112:3000/csvFiles/" + fileName
+                    //   };
                     
-                      transporter.sendMail(mailOptions, function (error, info) {
-                        if (error) {
-                            console.log(error);
-                            res.json({status : "error", error : "There was an error while processing your request..."});
-                        } else {
-                          console.log("Email has been sent: " + info.response);
-                          res.json({status : "success"});
+                    //   transporter.sendMail(mailOptions, function (error, info) {
+                    //     if (error) {
+                    //         console.log(error);
+                    //         res.json({status : "error", error : "There was an error while processing your request..."});
+                    //     } else {
+                    //       console.log("Email has been sent: " + info.response);
+                    //       res.json({status : "success"});
 
-                        }
-                    });
+                    //     }
+                    // });
+
+
+
+                    // if(sendMailService(req.query.exportEmail, "http://192.168.1.112:3000/csvFiles/" + fileName)){
+                    //     // console.log("Email has been sent: " + info.response);
+                    //     res.json({status : "success"});
+                    // } else {
+                    //     // console.log(error);
+                    //     res.json({status : "error", error : "There was an error while processing your request..."});
+                    // }
+
+
+                    try {
+                        await emailScheduleModel.create({
+                            receiverEmail : req.query.exportEmail,
+                            receiverEmailText : "http://192.168.1.112:3000/csvFiles/" + fileName
+                        });
+                        res.json({status : "success"});
+                    } catch (error) {
+                        res.json({status : "error", error : "There was an error while processing your request..."});
+                    }                    
                 }
                 console.log(fileName);
                 res.json({status : "success", downloadUrl : "http://192.168.1.112:3000/csvFiles/" + fileName, fileName})
