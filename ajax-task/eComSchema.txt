@@ -1,0 +1,143 @@
+Sudo Name :- Aegon
+
+
+categories :-
+
+{
+    _id
+
+    categoryName : {
+        type : String,
+        minlength : 3,
+        maxlength : 15,
+        required : [true, 'Category name is required']
+    }   
+
+}
+
+subCategories :-
+
+{
+    _id
+
+    subCategoryName : {
+        type : String,
+        minlength : 3,
+        maxlength : 15,
+        required : [true, 'Sub category name is required']
+    },
+    _category :  {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : 'categories'
+    },
+
+}
+
+
+products :-
+
+{
+    _id
+
+    _subCategory : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : 'subCategories'
+    },
+    productName : {
+        type : String,
+        minlength : 3,
+        maxlength : 15,
+        required : [true, 'Product name is required']
+    },
+    productDesc : {
+        type : String,
+        minlength : 3,
+        maxlength : 100,
+        required : [true, 'Product description name is required']
+    },
+    productPrice : {
+        type : Number,
+        min : 1,
+        required : [true, 'Product price is required']
+    },
+    productImages : [{
+        type : String
+    }],
+
+}
+
+
+users :-
+
+{
+    _id
+
+    userName : {
+        type : String,
+        minlength : 3,
+        required : [true, 'Username is required']
+    },
+    userEmail : {
+        type : String,
+        minlength : 10,
+        required : [true, 'Email is required']
+    },
+    userPassword : {
+        type : String,
+        required : [true, 'Password is required']
+    },
+    userAddress : {
+        type : String,
+        minlength : 10,
+        maxlength : 50,
+        required : [true, 'Address is required']
+    },
+    userGender : {
+        type : String,
+        enum: {
+            values: ["male", "female", "other", "do not want to disclose"],
+            message: '{VALUE} is not supported'
+        }
+    },
+    userLocation : {
+        type : String
+    },
+    userContactNumber : {
+        type : Number,
+        minlength : 10,
+        maxlength : 15
+    },
+    userProfileImage : {
+        type : String
+    },
+    isActive : {
+        type : Boolean,
+        default : true
+    }
+
+}
+
+
+orders :-
+
+{
+    _id
+
+    _user : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : 'users'
+    },
+    _productsBought : [
+        {
+            product : {
+                type : mongoose.Schema.Types.ObjectId,
+                ref : 'products'
+            },
+            quantity : {
+                type : Number,
+                min : 1
+            }
+        }
+    ],
+
+}

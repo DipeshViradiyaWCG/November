@@ -88,4 +88,22 @@
 // }, null, true, 'America/Los_Angeles');
 // job.start();
 
+const fs = require("fs");
+const { promisify } = require("util");
+let temp;
+// fs.readFile("./playGround2.js", "utf-8", (err, data) => {
+//     if(err)
+//         console.log(err);
+//     else{
+//         eval(data);
+//     }
+// });
 
+let readFileAsync = promisify(fs.readFile);
+async function loadCode() {
+    eval(await readFileAsync("./playGround2.js", "utf-8"));
+};
+
+loadCode();
+// console.log(temp);
+// eval(temp);

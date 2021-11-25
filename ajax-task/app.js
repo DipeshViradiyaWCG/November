@@ -17,10 +17,9 @@ var usersRouter = require('./routes/users');
 
 // DB Code
 var mongoose = require('mongoose');
-const emailSchedule = require('./models/emailSchedule');
 mongoose.connect(
   "mongodb://admin:admin@localhost:27017/ajax-pro").then(
-    () => {console.log("Connected");}
+    () => {console.log("app Connected");}
   ).catch(
     (err) => {throw err;}
 );
@@ -50,25 +49,25 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Entertain one mail request at every minute 
-var job = new CronJob(
-	'* * * * *',
-	async function() {
-		try {
-      let emailsToSend = await emailScheduleModel.find({status : 0}).lean();
-      if(emailsToSend.length > 0){
-        sendMailService(emailsToSend[0].receiverEmail, emailsToSend[0].receiverEmailText);  
-        await emailScheduleModel.updateOne({status : 0}, {status : 1});
-      }
-    } catch (error) {
-      console.log(error);
-    }
-	},
-	null,
-	true,
-	'America/Los_Angeles'
-);
+// var job = new CronJob(
+// 	'* * * * *',
+// 	async function() {
+// 		try {
+//       let emailsToSend = await emailScheduleModel.find({status : 0}).lean();
+//       if(emailsToSend.length > 0){
+//         sendMailService(emailsToSend[0].receiverEmail, emailsToSend[0].receiverEmailText);  
+//         await emailScheduleModel.updateOne({status : 0}, {status : 1});
+//       }
+//     } catch (error) {
+//       console.log(error);
+//     }
+// 	},
+// 	null,
+// 	true,
+// 	'America/Los_Angeles'
+// );
 
-job.start();
+// job.start();
 
 
 app.use('/', indexRouter);
