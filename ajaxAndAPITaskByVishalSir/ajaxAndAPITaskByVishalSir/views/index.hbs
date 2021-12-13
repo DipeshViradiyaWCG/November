@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+    <link rel="stylesheet" href="/stylesheets/style.css">
+
+    <!-- Jquery confirm CSS -->
+    <link rel="stylesheet" href="/stylesheets/jquery-confirm.css">
+
+    <title>Ajax task</title>
+  </head>
+  <body>
+        <div class="container">
+            <div class="row mt-5">
+                <div class="col-5">
+                    <form id="form" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label class="form-label">Name <span class="text-danger">*</span></label>
+                                <input type="text" name="name" class="form-control" id="name">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="text" name="email" class="form-control" id="email">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Contact <span class="text-danger">*</span></label>
+                                <input type="number" name="contact" class="form-control" id="contact">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Password <span class="text-danger">*</span></label>
+                                <input type="password" name="password" class="form-control" id="password">
+                            </div>
+                            
+                            <div class="btns" id="btns">
+                                <button type="submit" class="btn btn-primary" id="btnsubmit">Add user</button>
+                            </div>
+                            <span class="text-danger">*</span> indicates necessary fields
+                            <p id="errorMessage" class="text-danger"></p>
+                        </form>
+                </div> 
+                <div class="col-2"></div>
+
+                <div class="col-5" id="showUsersDiv">
+                    
+                </div>
+
+            </div>
+        </div>
+
+    {{!-- bootstrap --}}
+    <script src="/javascripts/bootstrap.min.js"></script>
+
+    {{!-- jQuery --}}
+    <script src="/javascripts/jquery.js"></script>
+    <script src="/javascripts/jquery-validate.js"></script>
+    <script src="/javascripts/jquery-confirm.js"></script>
+
+    {{!-- local javascript file --}}
+    <script src="/javascripts/usersPage.js"></script>
+  </body>
+</html>

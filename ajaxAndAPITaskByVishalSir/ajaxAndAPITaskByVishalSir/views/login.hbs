@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/stylesheets/bootstrap.min.css">
+    <link rel="stylesheet" href="/stylesheets/style.css">
+
+    <!-- Jquery confirm CSS -->
+    <link rel="stylesheet" href="/stylesheets/jquery-confirm.css">
+
+    <title>Ajax task</title>
+  </head>
+  <body>
+      <div class="container">
+          <div class="row mt-5">
+              <h2>Login</h2><br><br>
+              <div class="col-6">
+                  <form id="loginForm" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label">Email or contact no. <span class="text-danger">*</span></label>
+                            <input type="text" name="emailOrContact" class="form-control" id="emailOrContact">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password <span class="text-danger">*</span></label>
+                            <input type="password" name="password" class="form-control" id="password">
+                        </div>
+                        
+                        <div class="btns" id="btns">
+                            <button type="submit" class="btn btn-primary" id="btnsubmit">Login</button>
+                        </div>
+                        <br>
+                        <span class="text-danger">*</span> indicates necessary fields
+                        <p id="errorMessage" class="text-danger"></p>
+                    </form>
+              </div> 
+          </div>
+      </div>
+
+    {{!-- bootstrap --}}
+    <script src="/javascripts/bootstrap.min.js"></script>
+
+    {{!-- jQuery --}}
+    <script src="/javascripts/jquery.js"></script>
+    <script src="/javascripts/jquery-validate.js"></script>
+    <script src="/javascripts/jquery-confirm.js"></script>
+
+    {{!-- local javascript file --}}
+    <script src="/javascripts/loginPage.js"></script>
+  </body>
+</html>
