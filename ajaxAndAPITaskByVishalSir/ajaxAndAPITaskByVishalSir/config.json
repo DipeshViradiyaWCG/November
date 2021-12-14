@@ -1,0 +1,18 @@
+{
+    "mongodb" : {
+        "databaseUsername" : "admin",
+        "databasePassword" : "admin",
+        "databaseHost" : "localhost",
+        "databasePort" : "27017",
+        "databaseName" : "ajax-api-pro"
+    },
+    "jwt" : {
+        "jwtAuthenticationSecretKey" : "asdfghjkllkjhgfdsaasdfghjkllkjhgfdsaasdfghjkllkjhgfdsaasdfghjkllkjhgfdsa"
+    },
+    "errorMessages" : {
+        "500" : "Something went wrong",
+        "401" : "Wrong credentials.",
+        "404" : "Something went wrong",
+        "422" : "Invalid token"
+    }
+}

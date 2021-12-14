@@ -46,9 +46,13 @@
     {{!-- jQuery --}}
     <script src="/javascripts/jquery.js"></script>
     <script src="/javascripts/jquery-validate.js"></script>
-    <script src="/javascripts/jquery-confirm.js"></script>
 
     {{!-- local javascript file --}}
-    <script src="/javascripts/loginPage.js"></script>
+    <script src="/javascripts/page-wise/login.js"></script>
+    <script>
+        $(document).ready(function(){
+            new loginEventHandler();
+        });
+    </script>
   </body>
 </html>

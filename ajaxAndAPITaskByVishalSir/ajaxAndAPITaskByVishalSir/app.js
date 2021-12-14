@@ -6,13 +6,20 @@ var logger = require('morgan');
 
 const hbs = require("express-handlebars");
 
+
+// Requiring the global config
+global.config = require("./config");
+
+global.authAPI = require("./middlewares/authAPI");
+global.isLogin = require("./middlewares/isLogin");
+
 var indexRouter = require('./routes/index');
 var apiRouter = require('./routes/api');
 
 // DB Code
 var mongoose = require('mongoose');
 mongoose.connect(
-  "mongodb://admin:admin@localhost:27017/ajax-api-pro").then(
+  `mongodb://${config.mongodb.databaseUsername}:${config.mongodb.databasePassword}@${config.mongodb.databaseHost}:${config.mongodb.databasePort}/${config.mongodb.databaseName}`).then(
     () => {console.log("Connected");}
   ).catch(
     (err) => {throw err;}

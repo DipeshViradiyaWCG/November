@@ -88,9 +88,9 @@
 // }, null, true, 'America/Los_Angeles');
 // job.start();
 
-const fs = require("fs");
-const { promisify } = require("util");
-let temp;
+// const fs = require("fs");
+// const { promisify } = require("util");
+// let temp;
 // fs.readFile("./playGround2.js", "utf-8", (err, data) => {
 //     if(err)
 //         console.log(err);
@@ -99,11 +99,42 @@ let temp;
 //     }
 // });
 
-let readFileAsync = promisify(fs.readFile);
-async function loadCode() {
-    eval(await readFileAsync("./playGround2.js", "utf-8"));
-};
+// let readFileAsync = promisify(fs.readFile);
+// async function loadCode() {
+//     eval(await readFileAsync("./playGround2.js", "utf-8"));
+// };
 
-loadCode();
+// loadCode();
 // console.log(temp);
 // eval(temp);
+
+
+
+
+
+// import { createClient } from 'redis';
+const { createClient } = require("redis");
+
+(async () => {
+  const client = createClient();
+
+  client.on('error', (err) => console.log('Redis Client Error', err));
+
+  await client.connect();
+
+//   await client.set('key1', '1');
+//   await client.set('key2', '2');
+//   await client.set('key3', '3');
+//   await client.set('key4', 'value4');
+//   await client.set('key5', 'value5');
+//   await client.set('key6', 'value6');
+
+    // await client.del("key");
+
+//   console.log(await client.get('key1'));
+//   console.log(await client.get('key2'));
+//   console.log(await client.get('key3'));
+//   console.log(await client.get('key4'));
+//   console.log(await client.get('key5'));
+//   console.log(await client.get('key6'));
+})();

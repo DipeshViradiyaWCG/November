@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "serverAndCron" : "node ./bin/www & node cron.js",
+    "serverAndCron": "node ./bin/www & node cron.js",
     "cron": "node cron.js"
   },
   "dependencies": {
@@ -22,6 +22,7 @@
     "morgan": "~1.9.1",
     "multer": "^1.4.3",
     "nodemailer": "^6.7.1",
-    "qs": "^6.10.1"
+    "qs": "^6.10.1",
+    "redis": "^4.0.0"
   }
 }

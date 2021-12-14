@@ -1,0 +1,129 @@
+orderMaster :-
+
+{
+    _id
+
+    _user : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : 'users'
+    },
+    _shipment : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : 'shippingMaster'
+    },
+    orderDateTime : {
+        type : Date,
+        default : Date.now
+        required : [true, 'Date and time of order placement is required'],
+    },
+    orderStatus : {
+        type : String,
+        enum: {
+            values: ["accept", "reject", "pending"],
+            message: '{VALUE} is not supported'
+        },
+        required : [true, 'Order status is required'],
+    }
+
+}
+
+
+orderDetails :-
+
+{
+    _id
+    
+    _order : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : 'orders'
+    },
+    product : [
+        {
+            _product : {
+                type : mongoose.Schema.Types.ObjectId,
+                ref : 'products'
+            },
+            quantity : {
+                type : Number,
+                min : 1
+            }
+        }
+    ],
+    price : {
+        type : Number,
+        min : 1
+    }
+
+}
+
+
+shippingMaster :-
+
+{
+    _id
+
+    _order : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : 'orders'
+    },
+    _shippingAgency : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : 'shippingAgencies'
+    },
+    _city : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : 'cities'
+    },
+    shippingAddress : {
+        type : String,
+        minlength : 10,
+        maxlength : 50,
+        required : [true, 'Address is required']
+    },
+    shippingContactNumber : {
+        type : Number,
+        minlength : 10,
+        maxlength : 15
+    }
+
+}
+
+
+tracking :-
+
+{
+    _id
+
+    _order : {
+        type : mongoose.Schema.Types.ObjectId,
+        ref : 'orders'
+    },
+    trackingDateTime : {
+        type : Date,
+        default : Date.now
+        required : [true, 'Date and time is required'],
+    },
+    shipmentStatus : {
+        type : String,
+        enum: {
+            values: ["out for delivery", "arrived at", "left from"],
+            message: '{VALUE} is not supported'
+        },
+        required : [true, 'Order status is required'],
+    },
+    shipmentStop : {
+        shipmentStopAddress : {
+            type : String,
+            minlength : 10,
+            maxlength : 50,
+            required : [true, 'Address is required']
+        },
+        _shipmentStopCity : {
+            type : mongoose.Schema.Types.ObjectId,
+            ref : 'cities'
+        }
+    }
+
+}
+
+

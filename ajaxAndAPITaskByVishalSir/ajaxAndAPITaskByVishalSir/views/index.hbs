@@ -18,7 +18,7 @@
         <div class="container">
             <div class="row mt-5">
                 <div class="col-5">
-                    <form id="form" enctype="multipart/form-data">
+                    <form id="addUserForm">
                             <div class="mb-3">
                                 <label class="form-label">Name <span class="text-danger">*</span></label>
                                 <input type="text" name="name" class="form-control" id="name">
@@ -41,13 +41,24 @@
                             </div>
                             <span class="text-danger">*</span> indicates necessary fields
                             <p id="errorMessage" class="text-danger"></p>
-                        </form>
+                    </form>
+                    <br><hr><br>
+                    <h4>Upload csv file to add multiple users</h4>
+                    <form id="importForm">
+                        <div class="mb-3">
+                            <input type="file" name="importFile" class="form-control" id="importFile">
+                        </div>
+                        <a id="importBtn" class="btn btn-primary">Import csv and add users.</a>
+                        
+                    </form>
                 </div> 
                 <div class="col-2"></div>
 
                 <div class="col-5" id="showUsersDiv">
                     
                 </div>
+                <br>
+                
 
             </div>
         </div>
@@ -58,9 +69,13 @@
     {{!-- jQuery --}}
     <script src="/javascripts/jquery.js"></script>
     <script src="/javascripts/jquery-validate.js"></script>
-    <script src="/javascripts/jquery-confirm.js"></script>
 
     {{!-- local javascript file --}}
-    <script src="/javascripts/usersPage.js"></script>
+    <script src="/javascripts/page-wise/user.js"></script>
+    <script>
+        $(document).ready(function(){
+            new userEventHandler();
+        });
+    </script>
   </body>
 </html>
