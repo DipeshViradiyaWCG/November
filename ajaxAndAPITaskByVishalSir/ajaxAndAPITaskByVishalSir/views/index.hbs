@@ -19,53 +19,73 @@
             <div class="row mt-5">
                 <div class="col-5">
                     <form id="addUserForm">
-                            <div class="mb-3">
-                                <label class="form-label">Name <span class="text-danger">*</span></label>
-                                <input type="text" name="name" class="form-control" id="name">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Email <span class="text-danger">*</span></label>
-                                <input type="text" name="email" class="form-control" id="email">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Contact <span class="text-danger">*</span></label>
-                                <input type="number" name="contact" class="form-control" id="contact">
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label">Password <span class="text-danger">*</span></label>
-                                <input type="password" name="password" class="form-control" id="password">
-                            </div>
-                            
-                            <div class="btns" id="btns">
-                                <button type="submit" class="btn btn-primary" id="btnsubmit">Add user</button>
-                            </div>
-                            <span class="text-danger">*</span> indicates necessary fields
-                            <p id="errorMessage" class="text-danger"></p>
-                    </form>
-                    <br><hr><br>
-                    <h4>Upload csv file to add multiple users</h4>
-                    <form id="importForm">
                         <div class="mb-3">
-                            <input type="file" name="importFile" class="form-control" id="importFile">
+                            <label class="form-label">Name <span class="text-danger">*</span></label>
+                            <input type="text" name="name" class="form-control" id="name">
                         </div>
-                        <a id="importBtn" class="btn btn-primary">Import csv and add users.</a>
+                        <div class="mb-3">
+                            <label class="form-label">Email <span class="text-danger">*</span></label>
+                            <input type="text" name="email" class="form-control" id="email">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Contact <span class="text-danger">*</span></label>
+                            <input type="number" name="contact" class="form-control" id="contact">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Password <span class="text-danger">*</span></label>
+                            <input type="password" name="password" class="form-control" id="password">
+                        </div>
                         
+                        <div class="btns" id="btns">
+                            <button type="submit" class="btn btn-primary" id="btnsubmit">Add user</button>
+                        </div>
+                        <span class="text-danger">*</span> indicates necessary fields
+                        <p id="errorMessage" class="text-danger"></p>
                     </form>
+                    
                 </div> 
                 <div class="col-2"></div>
 
-                <div class="col-5" id="showUsersDiv">
-                    
+                <div class="col-5 showUserDiv">
+                    <h1>Users &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a id="logoutBtn" class="btn btn-danger">Logout</a></h1>
+                    <br><hr>
+                    <h4>Upload csv file to add multiple users</h4><h6>(csv file must contain headers)</h6>
+                    <form id="importForm">
+                        <div class="row">
+                            <div class="col">
+                                <div class="mb-3">
+                                    <input type="file" name="importFile" class="form-control" id="importFile">
+                                </div>
+                            </div>
+                            <div class="col">
+                                <a id="importBtn" class="btn btn-primary" >Import csv and add users.</a>
+                            </div>
+                        </div>
+                        
+                        <p id="errorMessageFile" class="text-danger"></p>
+                        <p id="successMessageFile" class="text-primary"></p>
+                        <a id="exportBtn" class="btn btn-warning">Export to csv file</a>
+                    </form>
+                    <hr>
+                    <div id="showUsersDiv">
+
+                    </div>    
+                    <div id="showFilesDiv">
+
+                    </div>
                 </div>
                 <br>
-                
+            </div>
 
+            <div class="row mt-5">
+                <div id="mapFileDiv" class="mb-5">
+                    
+                </div>
             </div>
         </div>
-
+    
     {{!-- bootstrap --}}
     <script src="/javascripts/bootstrap.min.js"></script>
-
     {{!-- jQuery --}}
     <script src="/javascripts/jquery.js"></script>
     <script src="/javascripts/jquery-validate.js"></script>

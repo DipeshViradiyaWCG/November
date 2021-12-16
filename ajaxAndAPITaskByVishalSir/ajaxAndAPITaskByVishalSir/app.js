@@ -3,6 +3,7 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+const moment = require("moment");
 
 const hbs = require("express-handlebars");
 
@@ -34,7 +35,40 @@ app.engine(
   "hbs",
   hbs({
     extname: "hbs",
-    defaultLayout: false
+    defaultLayout: false,
+    helpers : {
+      "renderTable" : function(headerArray, demoEntryArray, dbFeildArray, options) {
+        let htmlStr = `<table class="table" id="mapTable">
+                        <thead>
+                            <tr>
+                                <th scope="col"> CSV file headers </th>
+                                <th scope="col"> Demo Entry </th>
+                                <th scope="col"> Data feilds </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                          `;
+        for(let i = 0; i < headerArray.length; i++) {
+          htmlStr +=  `<tr id="${options.fn(headerArray[i])}" class="${i}"><td>${options.fn(headerArray[i])}</td>
+                      <td>${options.fn(demoEntryArray[i])}</td>
+                      <td>
+                      <select name="dbFeild" id="${options.fn(headerArray[i])}" class="${i}">
+                            <option value="" selected>--select data feild--</option>`;
+          for(let j = 0; j < dbFeildArray.length; j++){
+            htmlStr += `
+                            <option value="${options.fn(dbFeildArray[j])}">${options.fn(dbFeildArray[j])}</option>
+                        `;
+          }
+                      
+          htmlStr += `</select></td></tr>`;
+        }
+        htmlStr += `
+                        </tbody>
+                    </table>`
+                    return htmlStr;
+      },
+      "formatTime":(time) => moment(time).format("YYYY-MM-DD LT"),
+    }
   })
 );
 

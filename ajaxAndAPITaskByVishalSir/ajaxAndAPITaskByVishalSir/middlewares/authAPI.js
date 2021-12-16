@@ -7,6 +7,7 @@ exports.authAPI = async function (req, res, next) {
         try {
             let user = await userModel.findOne({email : payLoad.email});
             if(user){
+                req.user = user
                 next();
             } else {
                 return res.json({ status : "error", code : 422, message : config.errorMessages[422] });    

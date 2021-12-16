@@ -1,4 +1,4 @@
-<h1>Users &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a id="exportBtn" class="btn btn-primary">Export to csv file</a></h1>
+
 <br>
 <table class="table" id="table">
     <thead>
@@ -6,6 +6,7 @@
             <th scope="col"> Name </th>
             <th scope="col"> Email </th>
             <th scope="col"> Contact </th>
+            <th scope="col"> Source file </th>
         </tr>
     </thead>
     <tbody>
@@ -14,9 +15,13 @@
                 <td>{{name}}</td>
                 <td>{{email}}</td>
                 <td>{{contact}}</td>
+                {{#if addedBy.name}}
+                    <td>{{addedBy.name}}</td>
+                {{else}}
+                    <td>Added Manually</td>
+                {{/if}}
             </tr>
         {{/each}}
     </tbody>
 </table>
 <br><br><br>
-<a id="logoutBtn" class="btn btn-primary">Logout</a>

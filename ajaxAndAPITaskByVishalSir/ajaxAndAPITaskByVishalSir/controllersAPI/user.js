@@ -4,8 +4,12 @@ const { validationResult } = require('express-validator');
 const { Parser } = require('json2csv');
 const moment = require("moment");
 const fs = require('fs');
+const csv = require("csvtojson");
+
+const { validateCsvData } = require("../utilities/validateCsvData");
 
 const userModel = require("../models/users");
+const csvFileModel = require("../models/csvFiles");
 
 exports.postLoginAPI = async function (req, res, next) {
     try {
@@ -17,7 +21,6 @@ exports.postLoginAPI = async function (req, res, next) {
         }
 
         if(user){
-            console.log(bcrypt.compareSync(req.body.password, user.password));
             if(bcrypt.compareSync(req.body.password, user.password)){
                 const token = jwt.sign({ email : user.email }, config.jwt.jwtAuthenticationSecretKey, {
                     expiresIn: 1000 * 60 * 60,
@@ -38,7 +41,6 @@ exports.postLoginAPI = async function (req, res, next) {
 exports.getShowUsersAPI = async function (req, res, next) {
     try {
         if(req.query.exportFlag){
-            console.log("true patiu");
             let users = await userModel.find({}, {name : 1, email : 1, contact : 1}).lean();
             const fields = [{
                 label:"Name",
@@ -62,14 +64,28 @@ exports.getShowUsersAPI = async function (req, res, next) {
             });
         } 
 
-        let users = await userModel.find({},{_id : 0, password : 0}).lean();
+        let users = await userModel.find({},{_id : 0, password : 0}).populate({
+            path : "addedBy",
+            select : "name"
+        }).lean();
         return res.render('showUsers', { users });
-        
+
     } catch (error) {
         console.log(error);
         return res.json({ status : "error", code : 404, message : config.errorMessages[404] });
     }
 };
+
+exports.getShowFilesAPI = async function (req, res, next) {
+    try {
+        let files = await csvFileModel.find({},{mapObject : 0, path : 0, skipFirstRow : 0, _id : 0}).lean();
+        console.log(files);
+        return res.render('showFiles', { files });
+    } catch (error) {
+        console.log(error);
+        return res.json({ status : "error", code : 404, message : config.errorMessages[404] });
+    }
+}
 
 exports.postAddUserAPI = async function (req, res, next) {
     try {
@@ -80,17 +96,17 @@ exports.postAddUserAPI = async function (req, res, next) {
                 name : name,
                 email : email,
                 contact : contact,
-                password : bcrypt.hashSync(password, 8)
+                password : bcrypt.hashSync(password, 8),
+                addedBy : req.user._id
             });
             return res.json({ status : "success", code : 200 });
         } else {
             let errs = {};
             for(let err of validationErrors){
-            if(errs[err.param] == undefined)
-                errs[err.param] = []
-            errs[err.param].length < 1 && errs[err.param].push(err.msg)
+                if(errs[err.param] == undefined)
+                    errs[err.param] = []
+                errs[err.param].length < 1 && errs[err.param].push(err.msg)
             }
-            console.log(errs);
             return res.json({ status : "error", code : 401, errs});
         }
     } catch (error) {
@@ -98,6 +114,77 @@ exports.postAddUserAPI = async function (req, res, next) {
         return res.json({ status : "error", code : 404, message : config.errorMessages[404] });
     }
 };
+
+
+exports.postImportFileAPI = async function (req, res, next) {
+    try {
+        let result = await csv().fromFile("public/importedCsvFiles/" + req.file.filename);
+
+        let collectionFeildsList = await userModel.aggregate([
+            {
+                "$project" : {
+                    "arrayofkeyvalue" : {
+                        "$objectToArray" : "$$ROOT"
+                    }
+                }
+            },{
+                "$unwind" : "$arrayofkeyvalue"
+            },{
+                "$group" : { 
+                    "_id" : null,
+                    "allkeys" : {
+                        "$addToSet" : "$arrayofkeyvalue.k"
+                    }
+                }
+            }
+        ]);
+        collectionFeildsList = collectionFeildsList[0]["allkeys"];
+        
+        collectionFeildsList.splice(collectionFeildsList.indexOf("_id"),1);
+        collectionFeildsList.splice(collectionFeildsList.indexOf("__v"),1);
+        collectionFeildsList.splice(collectionFeildsList.indexOf("password"),1);
+        // collectionFeildsList.splice(collectionFeildsList.indexOf("addedBy"),1);
+
+        let csvFileObj = await csvFileModel.create({
+            name : req.file.filename,
+            path : "public/importedCsvFiles/" + req.file.filename,
+            uploadedBy : req.user._id
+        });
+
+        res.render('csvMapTable', { collectionFeildsList, firstRow : Object.keys(result[0]), secondRow : Object.values(result[0]), fileUploaded : req.file.filename, fileId : csvFileObj._id });
+    } catch (error) {
+        console.log(error);
+        return res.json({ status : "error", code : 404, message : config.errorMessages[404] });
+    }
+};
+
+exports.postMapAndUploadUsersAPI = async function (req, res, next) {
+    try {
+        let result = await csv().fromFile("public/importedCsvFiles/" + req.query.fileUploaded);
+        
+        let validatedUsersData = await validateCsvData(result, req.body, req.query.fileId);
+
+        
+        if(validatedUsersData.validUserData.length > 0){
+            await userModel.insertMany(validatedUsersData.validUserData);
+        }
+        await csvFileModel.updateOne({ _id : req.query.fileId} , {
+            mapObject : req.body,
+            totalRecords : result.length,
+            duplicates : validatedUsersData.duplicateEntryCount,
+            discarded : validatedUsersData.duplicateEntryInCsvCount,
+            totalUploaded : validatedUsersData.validUserData.length,
+            status : "uploaded"
+        })
+        let message = `<br>Thank you for uploading data file.<br>Out of total ${result.length} records, we found,<br>${validatedUsersData.invalidEntryCount} Invalid data entries,<br>${validatedUsersData.validEntryCount} Valid data entries,<br>Out of which ${validatedUsersData.duplicateEntryCount} records were already in existance,<br>We also ignored ${validatedUsersData.duplicateEntryInCsvCount} records which were duplicates in csv file itself... :)<br>We added total ${validatedUsersData.validUserData.length} records to database.`;
+
+        return res.json({ status : "success", code : 200, message });
+
+    } catch (error) {
+        console.log(error);
+        return res.json({ status : "error", code : 404, message : config.errorMessages[404] });
+    }
+}
 
 exports.getLogoutAPI = async function (req, res, next) {
     try {

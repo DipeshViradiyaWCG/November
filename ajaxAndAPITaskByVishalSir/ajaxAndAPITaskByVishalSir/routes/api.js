@@ -1,13 +1,30 @@
 var express = require('express');
 var router = express.Router();
 
-const { postLoginAPI, getShowUsersAPI, postAddUserAPI, getLogoutAPI, getExportUsers } = require('../controllersAPI/user');
+const { postLoginAPI, getShowUsersAPI, postAddUserAPI, getLogoutAPI, postImportFileAPI, postMapAndUploadUsersAPI, getShowFilesAPI } = require('../controllersAPI/user');
 const { check } = require('express-validator');
 const userModel = require("../models/users");
+
+// Multer initialization for file upload
+const multer = require("multer");
+const multerStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "public/importedCsvFiles");
+  },
+  filename: (req, file, cb) => {
+    cb(null, `User-${req.user.name}-${Date.now()}.${file.mimetype.split("/")[1]}`);
+  },
+});
+
+const upload = multer({
+  storage: multerStorage
+});
 
 router.post('/login', postLoginAPI);
 
 router.get('/showUsers', authAPI.authAPI, getShowUsersAPI);
+
+router.get('/showFiles', authAPI.authAPI, getShowFilesAPI);
 
 router.post('/addUser', authAPI.authAPI, [
     check("name")
@@ -39,6 +56,10 @@ router.post('/addUser', authAPI.authAPI, [
     .isLength({min : 6})
     .withMessage("Password should be 6 characters long")
 ], postAddUserAPI);
+
+router.post('/importFile', authAPI.authAPI, upload.single("importFile"), postImportFileAPI);
+
+router.post('/uploadUsersToDB', authAPI.authAPI, postMapAndUploadUsersAPI);
 
 router.get('/logout', getLogoutAPI);
 
