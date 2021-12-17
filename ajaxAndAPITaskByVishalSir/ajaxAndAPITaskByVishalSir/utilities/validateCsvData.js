@@ -1,6 +1,12 @@
 const userModel = require("../models/users");
 const bcrypt = require("bcryptjs");
 
+/**
+ * A function to validate non empty and valid value of user data.
+ * @param {User data obj} userObj 
+ * @param {Map choice obj from csv header to db feilds} mapObj 
+ * @returns Boolean value for validation of attributes
+ */
 function validateEntry(userObj, mapObj){
     let emailRegExp = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
     let emailValidation = contactValidation = nameValidation = true;
@@ -14,13 +20,17 @@ function validateEntry(userObj, mapObj){
         contactValidation = (userObj[[mapObj["contact"]]].toString().length > 0) && (!(isNaN(parseInt(userObj[[mapObj["contact"]]]))));
     }
     return (emailValidation && nameValidation && contactValidation);
-    // return ((userObj[mapObj["email"]].length > 0) && (emailRegExp.test(userObj[mapObj["email"]])) && (userObj[mapObj["name"]].length > 0) && (userObj[[mapObj["contact"]]].toString().length > 0) && (!(isNaN(parseInt(userObj[[mapObj["contact"]]])))));
 }
 
+/**
+ * A function to check duplicates in csv file for DB.
+ * @param {User data obj} userObj 
+ * @param {Map choice for email} csvHeaderForEmail 
+ * @param {Map choice for contact} csvHeaderForContact 
+ * @returns Boolean value - true for duplication
+ */
 async function checkDuplicateEntry (userObj, csvHeaderForEmail, csvHeaderForContact) {
     try {
-        // let user = await userModel.findOne({email : userObj[csvHeaderForEmail]});
-
         let user;
         if(csvHeaderForEmail != undefined) {
             user = await userModel.findOne({email : userObj[csvHeaderForEmail]});
@@ -39,6 +49,13 @@ async function checkDuplicateEntry (userObj, csvHeaderForEmail, csvHeaderForCont
     }
 }
 
+/**
+ * A utility function to validate user data, check for duplicates.
+ * @param {Array of user data objects} csvArray 
+ * @param {User's map choice obj} mapObj 
+ * @param {Object ID of csv file from which user data belongs to} addedBy 
+ * @returns invalidEntryCount, validEntryCount, duplicateEntryCount, duplicateEntryInCsvCount, validUserData
+ */
 exports.validateCsvData = async function (csvArray, mapObj, addedBy) {
     let duplicateEntryCount = invalidEntryCount = validEntryCount = duplicateEntryInCsvCount = 0;
     let csvArrayLength = csvArray.length;

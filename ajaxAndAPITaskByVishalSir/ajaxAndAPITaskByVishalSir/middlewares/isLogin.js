@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 
+// Verify cookie token and allow user the page access.
 exports.isLogin = function (req, res, next) {
     console.log("req.cookies",  req.cookies.authToken);
     if(req.cookies.authToken){

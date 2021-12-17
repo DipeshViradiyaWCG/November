@@ -4,6 +4,7 @@ const loginEventHandler = function (){
         _this.loginUser();
     };
 
+    // Send request to login validated user.
     this.loginUser = function(){
         $("#loginForm").validate({
             rules : {

@@ -1,5 +1,5 @@
-const fs = require('fs');
-const readline = require('readline');
+// const fs = require('fs');
+// const readline = require('readline');
 // const csv = require("csvtojson");
 
 // (async function readFile(){
@@ -29,17 +29,56 @@ const readline = require('readline');
 //     const data = await fs.promises.readFile("./demo.csv", "binary");
 //     console.log(data);
 // })();
-const file = readline.createInterface({
-    input: fs.createReadStream('./demo.csv'),
-    output: process.stdout,
-    terminal: false
-});
+// const file = readline.createInterface({
+//     input: fs.createReadStream('./demo.csv'),
+//     output: process.stdout,
+//     terminal: false
+// });
 
-let count = 0;
-file.on('line', (line) => {
-    console.log(line);
-    count ++;
-    if(count == 1){
-        return;
-    }
-});
+// let count = 0;
+// file.on('line', (line) => {
+//     console.log(line);
+//     count ++;
+//     if(count == 1){
+//         return;
+//     }
+// });
+
+var fs = require('fs');
+ 
+function get_line(filename, line_no, callback) {
+    var stream = fs.createReadStream(filename, {
+      flags: 'r',
+      encoding: 'utf-8',
+      fd: null,
+      mode: 0666,
+      bufferSize: 64 * 1024
+    });
+ 
+    var fileData = '';
+    stream.on('data', function(data){
+      fileData += data;
+ 
+      // The next lines should be improved
+      var lines = fileData.split("\n");
+ 
+      if(lines.length >= +line_no){
+        stream.destroy();
+        callback(null, lines[+line_no]);
+      }
+    });
+ 
+    stream.on('error', function(){
+      callback('Error', null);
+    });
+ 
+    stream.on('end', function(){
+      callback('File end reached without finding line', null);
+    });
+ 
+}
+ 
+get_line('public/importedCsvFiles/dipeshTestCase1.csv', 2, function(err, line){
+  console.log('The line: ' + line);
+})
+

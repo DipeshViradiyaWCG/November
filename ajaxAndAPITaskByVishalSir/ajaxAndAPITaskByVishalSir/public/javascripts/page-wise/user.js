@@ -14,6 +14,7 @@ const userEventHandler = function (){
         _this.cancelMessage();
     };
 
+    // send request to get users data
     this.showUsers = function(){
         $.ajax({
             url : '/api/showUsers',
@@ -31,6 +32,7 @@ const userEventHandler = function (){
         });
     };
 
+    // send request to get file data
     this.showFiles = function () {
         $.ajax({
             url : '/api/showFiles',
@@ -39,9 +41,15 @@ const userEventHandler = function (){
                 'authToken': document.cookie.split("=")[1]
             },
             success : function (res) {
-                console.log(res);
                 if(res.code != 404){
                     $("#showFilesDiv").html(res);
+                    for(let ele of $("td")){
+                        if($(ele).html() == "pending"){
+                           $(ele).attr("class", "text-danger");
+                        } else if($(ele).html() == "uploaded") {
+                            $(ele).attr("class", "text-success");
+                        }
+                    }
                 } else {
                     $("#errorMessage").html(res.message);
                 }
@@ -49,6 +57,7 @@ const userEventHandler = function (){
         });
     }
 
+    // send request to add validated user data.
     this.addUser = function () {
         $("#addUserForm").validate({
             rules : {
@@ -107,6 +116,7 @@ const userEventHandler = function (){
         });
     }
 
+    // send request to logout user
     this.logoutUser = function () {
         $(document).off('click', 'a#logoutBtn').on('click', 'a#logoutBtn', function(){
             $.ajax({
@@ -123,6 +133,7 @@ const userEventHandler = function (){
         });
     }
 
+    // send request to export csv file of user data. 
     this.exportUser = function () {
         $(document).off('click', 'a#exportBtn').on('click', 'a#exportBtn', function(){
             $.ajax({
@@ -144,6 +155,7 @@ const userEventHandler = function (){
         });
     }
 
+    // send request to upload validated csv file and generate GUI for mapping.
     this.importFile = function () {
         $("#importBtn").click(function () {
 
@@ -176,7 +188,29 @@ const userEventHandler = function (){
                         $("#mapFileDiv").html(res);
                         $("div.showUserDiv").css("pointer-events","none");
                         $(document).scrollTop($(document).height());
-                        // $("#importForm")[0].reset();
+                        mapHeaderObj = {};
+
+                        // Do not allow user to select multiple choice for same data feild
+                        let totalDropDown = $("select").length;
+                        let demo = {};
+                        for(let i = 0; i < totalDropDown; i++){
+                            demo[i] = "";
+                        }
+                        for(let i = 0; i < totalDropDown; i++){
+                            $("select."+i).change(function(){
+                                let valueEnable = demo[$("select."+i).attr('class')];
+                                demo[$("select."+i).attr('class')] = $("select."+i).val();
+                                let valueDisable = $("select."+i).val();
+                                for(let j = 0; j < totalDropDown; j++){
+                                    if(valueDisable != "" && j != i){
+                                        $("select."+j).children("option[value='"+ valueDisable +"']").prop('disabled', true);
+                                    }
+                                    $("select."+j).children("option[value='"+ valueEnable +"']").prop('disabled', false);
+                                }
+                                console.log(JSON.stringify(demo));
+                            });
+                        }
+                        
                     } else {
                         $("p#errorMessageFile").html(res.message);
                     }
@@ -185,68 +219,78 @@ const userEventHandler = function (){
         });
     }
 
+    // Map csv headers with db feilds according to user's validated choices and send request to upload data to db.
     this.mapFile = function () {
         $(document).off('click', "#mapBtn").on('click', "#mapBtn", function () {
             
-            let multiplefeildSelectFlag = false;
+            // let multiplefeildSelectFlag = false;
             for( let i = 0; i < $("#mapTable > tbody > tr").length; i++ ){
-                if($("select."+i).val().length != 0){
-                    if(mapHeaderObj[$("select."+i).val().slice(0,-1)]){
-                        multiplefeildSelectFlag = true;
-                    }
-                    mapHeaderObj[$("select."+i).val().slice(0,-1)] = $("select."+i).attr('id').slice(0,-1);
+                // console.log($("select."+i).val(), " ",$("select."+i).val().trim().length );
+                if($("select." + i).val().length != 0){
+                    // if(mapHeaderObj[$("select."+i).val().trim()]){
+                    //     multiplefeildSelectFlag = true;
+                    // }
+                    mapHeaderObj[$("select."+i).val().trim()] = $("select."+i).attr('id').trim();
                 }
             }
             if((mapHeaderObj["email"]) || (mapHeaderObj["contact"])){
-                if(multiplefeildSelectFlag){
-                    $("#warningMessage").html(`Thanks for uploading file.<br>Selecting same data feild multiple times will consider the last one.We recommend you to reconsider your choices.<br>Other wise mapping will follow the following pattern.<br>`);
-                    let htmlStr = `    <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Data Feild</th>
-                            <th>CSV header in consideration</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        `;
-                        for(let key of Object.keys(mapHeaderObj)){
-                            htmlStr += `<tr><td>` + key + `</td><td>` + mapHeaderObj[key] + `</td></tr>`;
-                        }
-                        htmlStr += `            </tr>
-                                            </tbody>
-                                        </table>
-                                        <a id="okBtn" class="btn btn-primary" >Ok</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a id="cancelBtn" class="btn btn-secondary">Cancel</a>`;
-                    $("#mapObjTable").html("");
-                    $("#mapObjTable").html(htmlStr);
-                    $(document).scrollTop($(document).height());
-                } else {
+                // if(multiplefeildSelectFlag){
+                //     $("#warningMessage").html(`Thanks for uploading file.<br>
+                //         Selecting same data feild multiple times will consider the last one.We recommend you to reconsider your choices.<br>
+                //         Other wise mapping will follow the following pattern.<br>`);
+                //     let htmlStr = `<table class="table">
+                //                         <thead>
+                //                             <tr>
+                //                                 <th>Data Feild</th>
+                //                                 <th>CSV header in consideration</th>
+                //                             </tr>
+                //                         </thead>
+                //                         <tbody>
+                //         `;
+                //     for(let key of Object.keys(mapHeaderObj)){
+                //         htmlStr += `<tr><td>` + key + `</td><td>` + mapHeaderObj[key] + `</td></tr>`;
+                //     }
+                //     htmlStr += `            </tr>
+                //                         </tbody>
+                //                     </table>
+                //                     <a id="okBtn" class="btn btn-primary" >Ok</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a id="cancelBtn" class="btn btn-secondary">Cancel</a>`;
+                //     $("#mapObjTable").html("");
+                //     $("#mapObjTable").html(htmlStr);
+                //     $(document).scrollTop($(document).height());
+                // } else {
                     $("#mapObjTable").html("");
                     $("#warningMessage").html("Thank you for uploading a file.Your request will be processed soon...");
                     _this.uploadUsersToDB();
+                    $("div#mapFileDiv").html("");
                     $("div.showUserDiv").css("pointer-events","all");
-                }
+                // }
             } else {
                 $("#warningMessage").html("You must map csv header with either email or contact no.");
             }
         });
     }
 
+    // Allow user revert back uploaded csv file
     this.cancelMapFile = function () {
         $(document).off('click', "#mapCancelBtn").on('click', "#mapCancelBtn", function () {
             $("#mapFileDiv").html("");
             $("div.showUserDiv").css("pointer-events","all");
             $("#importForm")[0].reset();
+            mapHeaderObj = {}
         });
     }
 
+    // Allow user to revert back map choices for file
     this.cancelMapChoices = function () {
         $(document).off('click', "#cancelBtn").on('click', "#cancelBtn", function () {
             $("#mapObjTable").html("");
             $("#warningMessage").html("");
             $("div.showUserDiv").css("pointer-events","all");
+            mapHeaderObj = {}
         });
     }
 
+    // Allow user to confirm the map choices.
     this.confirmMapChoices = function () {
         $(document).off('click', "#okBtn").on('click', "#okBtn", function () {
             $("#mapObjTable").html("");
@@ -257,6 +301,7 @@ const userEventHandler = function (){
         });
     }
 
+    // Send request to validate and upload user data.
     this.uploadUsersToDB = function () {
         $.ajax({
             url : '/api/uploadUsersToDB?fileUploaded=' + $("p.fileUploaded").attr('id') + "&fileId=" + $("p.fileId").attr('id'),
@@ -272,12 +317,14 @@ const userEventHandler = function (){
                     $("#warningMessage").html("");
                     $("#successMessageFile").html(`<button class="btn btn-secondary" id="messageClose"><h6>X<h6></button>` + res.message);
                     _this.showUsers();
+                    _this.showFiles();
                     $("#importForm")[0].reset();
                 }
             }
         });
     }
 
+    // Allow user to remove error and success messages from UI.
     this.cancelMessage = function () {
         $(document).off('click', "#messageClose").on('click', "#messageClose", function () {
             $("#warningMessage").html("");

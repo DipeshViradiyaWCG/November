@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 
 const userModel = require("../models/users");
 
+// create a by default master admin on first time server start.
 (async function createAdmin(){
     try {
         let adminExist = await userModel.find({email : "admin@admin.com"}).lean();

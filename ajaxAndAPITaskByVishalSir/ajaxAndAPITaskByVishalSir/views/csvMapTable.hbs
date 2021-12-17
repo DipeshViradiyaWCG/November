@@ -1,37 +1,13 @@
-{{!-- <table class="table" id="mapTable">
-    <thead>
-        <tr>
-            <th scope="col"> CSV file headers </th>
-            <th scope="col"> Demo Entry </th>
-            <th scope="col"> Data feilds </th>
-        </tr>
-    </thead>
-    <tbody>
-        {{#each firstRow}}
-        <tr>
-            <td>{{firstRow}}</td>
-            <td>Dipesh</td>
-            <td>
-                <select name="dbFeild" id="dbFeild">
-                    <option value="" selected disabled>--select data feild--</option>
-                    <option value="name"></option>
-                </select>
-            </td>
-        </tr>
-        {{/each}}
-    </tbody>
-</table> --}}
-
 <h3>Map the csv header with data feilds</h3>
 <p id="{{fileUploaded}}" class="fileUploaded" hidden></p>
 <p id="{{fileId}}" class="fileId" hidden></p>
 {{#renderTable firstRow secondRow collectionFeildsList}}
-{{this}}
+    {{this}}
 {{/renderTable}}
 <br>
-<a id="mapBtn" class="btn btn-primary">Add Users</a>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<a id="mapCancelBtn" class="btn btn-secondary">Cancel</a>
+<a id="mapBtn" class="btn btn-primary">Add Users</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a id="mapCancelBtn" class="btn btn-secondary">Cancel</a>
 <p id="warningMessage" class="text-primary"></p>
+
 <div id="mapObjTable">
+
 </div>

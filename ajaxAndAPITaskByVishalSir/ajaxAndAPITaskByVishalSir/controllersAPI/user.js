@@ -8,9 +8,11 @@ const csv = require("csvtojson");
 
 const { validateCsvData } = require("../utilities/validateCsvData");
 
+// requiring db model
 const userModel = require("../models/users");
 const csvFileModel = require("../models/csvFiles");
 
+// verify user credentials and generate token
 exports.postLoginAPI = async function (req, res, next) {
     try {
         let user;
@@ -38,6 +40,7 @@ exports.postLoginAPI = async function (req, res, next) {
     }
 };
 
+// process get users request for verified token
 exports.getShowUsersAPI = async function (req, res, next) {
     try {
         if(req.query.exportFlag){
@@ -76,10 +79,10 @@ exports.getShowUsersAPI = async function (req, res, next) {
     }
 };
 
+// get files data from db
 exports.getShowFilesAPI = async function (req, res, next) {
     try {
         let files = await csvFileModel.find({},{mapObject : 0, path : 0, skipFirstRow : 0, _id : 0}).lean();
-        console.log(files);
         return res.render('showFiles', { files });
     } catch (error) {
         console.log(error);
@@ -87,6 +90,7 @@ exports.getShowFilesAPI = async function (req, res, next) {
     }
 }
 
+// Add validated user data to db
 exports.postAddUserAPI = async function (req, res, next) {
     try {
         let validationErrors = validationResult(req).array();
@@ -115,11 +119,12 @@ exports.postAddUserAPI = async function (req, res, next) {
     }
 };
 
-
+// convert file from csv to json and send first two rows and db feilds for mapping
 exports.postImportFileAPI = async function (req, res, next) {
     try {
         let result = await csv().fromFile("public/importedCsvFiles/" + req.file.filename);
 
+        // An aggregation query to generate array of db collection feilds
         let collectionFeildsList = await userModel.aggregate([
             {
                 "$project" : {
@@ -143,28 +148,33 @@ exports.postImportFileAPI = async function (req, res, next) {
         collectionFeildsList.splice(collectionFeildsList.indexOf("_id"),1);
         collectionFeildsList.splice(collectionFeildsList.indexOf("__v"),1);
         collectionFeildsList.splice(collectionFeildsList.indexOf("password"),1);
-        // collectionFeildsList.splice(collectionFeildsList.indexOf("addedBy"),1);
-
+        collectionFeildsList.splice(collectionFeildsList.indexOf("addedBy"),1);
+        collectionFeildsList.map((value) => value.trim());
         let csvFileObj = await csvFileModel.create({
             name : req.file.filename,
             path : "public/importedCsvFiles/" + req.file.filename,
             uploadedBy : req.user._id
         });
 
-        res.render('csvMapTable', { collectionFeildsList, firstRow : Object.keys(result[0]), secondRow : Object.values(result[0]), fileUploaded : req.file.filename, fileId : csvFileObj._id });
+        res.render('csvMapTable', { 
+            collectionFeildsList, 
+            firstRow : Object.keys(result[0]).map((value) => value.trim()),
+            secondRow : Object.values(result[0]).map((value) => value.trim()), 
+            fileUploaded : req.file.filename, 
+            fileId : csvFileObj._id 
+        });
     } catch (error) {
         console.log(error);
         return res.json({ status : "error", code : 404, message : config.errorMessages[404] });
     }
 };
 
+// Validate csv file data and map it with user's choice, Upload valid data to DB, send confirmation to user.
 exports.postMapAndUploadUsersAPI = async function (req, res, next) {
     try {
         let result = await csv().fromFile("public/importedCsvFiles/" + req.query.fileUploaded);
-        
         let validatedUsersData = await validateCsvData(result, req.body, req.query.fileId);
 
-        
         if(validatedUsersData.validUserData.length > 0){
             await userModel.insertMany(validatedUsersData.validUserData);
         }
@@ -176,7 +186,13 @@ exports.postMapAndUploadUsersAPI = async function (req, res, next) {
             totalUploaded : validatedUsersData.validUserData.length,
             status : "uploaded"
         })
-        let message = `<br>Thank you for uploading data file.<br>Out of total ${result.length} records, we found,<br>${validatedUsersData.invalidEntryCount} Invalid data entries,<br>${validatedUsersData.validEntryCount} Valid data entries,<br>Out of which ${validatedUsersData.duplicateEntryCount} records were already in existance,<br>We also ignored ${validatedUsersData.duplicateEntryInCsvCount} records which were duplicates in csv file itself... :)<br>We added total ${validatedUsersData.validUserData.length} records to database.`;
+        let message = `<br>Thank you for uploading data file.<br>
+            Out of total ${result.length} records, we found,<br>
+            ${validatedUsersData.invalidEntryCount} Invalid data entries,<br>
+            ${validatedUsersData.validEntryCount} Valid data entries,<br>
+            Out of which ${validatedUsersData.duplicateEntryCount} records were already in existance,<br>
+            We also ignored ${validatedUsersData.duplicateEntryInCsvCount} records which were duplicates in csv file itself... :)<br>
+            We added total ${validatedUsersData.validUserData.length} records to database.`;
 
         return res.json({ status : "success", code : 200, message });
 
@@ -186,6 +202,7 @@ exports.postMapAndUploadUsersAPI = async function (req, res, next) {
     }
 }
 
+// clear cookie and logout user
 exports.getLogoutAPI = async function (req, res, next) {
     try {
         res.clearCookie('authToken');

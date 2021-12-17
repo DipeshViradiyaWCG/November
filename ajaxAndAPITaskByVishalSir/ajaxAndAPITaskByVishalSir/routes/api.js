@@ -26,6 +26,7 @@ router.get('/showUsers', authAPI.authAPI, getShowUsersAPI);
 
 router.get('/showFiles', authAPI.authAPI, getShowFilesAPI);
 
+// Sanatize and validate user data for duplication.
 router.post('/addUser', authAPI.authAPI, [
     check("name")
     .trim()
@@ -47,7 +48,13 @@ router.post('/addUser', authAPI.authAPI, [
     .trim()
     .not()
     .isEmpty()
-    .withMessage("Contact is required"),
+    .withMessage("Contact is required")
+    .custom(async (value) => {
+      let userObj = await userModel.findOne({contact : value}).lean();
+      if(userObj)
+          throw new Error("Entered contact account already exists...");
+      return true;
+    }),
     check("password")
     .trim()
     .not()

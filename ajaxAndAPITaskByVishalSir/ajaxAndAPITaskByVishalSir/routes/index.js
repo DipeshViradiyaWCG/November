@@ -7,4 +7,8 @@ router.get('/', getLogin);
 
 router.get('/users', isLogin.isLogin, getUsers);
 
+router.get('/test', (req, res, next) => {
+    res.render('test');
+});
+
 module.exports = router;
