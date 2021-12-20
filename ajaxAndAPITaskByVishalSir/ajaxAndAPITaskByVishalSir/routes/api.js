@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-const { postLoginAPI, getShowUsersAPI, postAddUserAPI, getLogoutAPI, postImportFileAPI, postMapAndUploadUsersAPI, getShowFilesAPI } = require('../controllersAPI/user');
+const { postLoginAPI, getShowUsersAPI, postAddUserAPI, getLogoutAPI, postImportFileAPI, postMapAndUploadUsersAPI, getShowFilesAPI, postAddNewDataFeildAPI } = require('../controllersAPI/user');
 const { check } = require('express-validator');
 const userModel = require("../models/users");
 
@@ -65,6 +65,8 @@ router.post('/addUser', authAPI.authAPI, [
 ], postAddUserAPI);
 
 router.post('/importFile', authAPI.authAPI, upload.single("importFile"), postImportFileAPI);
+
+router.post('/addNewDataFeild', authAPI.authAPI, postAddNewDataFeildAPI);
 
 router.post('/uploadUsersToDB', authAPI.authAPI, postMapAndUploadUsersAPI);
 

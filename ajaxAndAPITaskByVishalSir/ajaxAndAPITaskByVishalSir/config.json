@@ -10,9 +10,11 @@
         "jwtAuthenticationSecretKey" : "asdfghjkllkjhgfdsaasdfghjkllkjhgfdsaasdfghjkllkjhgfdsaasdfghjkllkjhgfdsa"
     },
     "errorMessages" : {
+        "200" : "Success...",
         "500" : "Something went wrong",
         "401" : "Wrong credentials.",
         "404" : "Something went wrong",
+        "409" : "Entity already in existance...",
         "422" : "Invalid token"
     }
 }

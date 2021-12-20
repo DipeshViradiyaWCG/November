@@ -77,9 +77,12 @@ exports.validateCsvData = async function (csvArray, mapObj, addedBy) {
                 }
                 else {
                     let tempUserObj = {};
-                    tempUserObj["name"] = csvArray[arrayIterator][mapObj["name"]] ? csvArray[arrayIterator][mapObj["name"]] : "";
-                    tempUserObj["email"] = csvArray[arrayIterator][mapObj["email"]] ? (csvArray[arrayIterator][mapObj["email"]]) : "";
-                    tempUserObj["contact"] = csvArray[arrayIterator][mapObj["contact"]] ? (csvArray[arrayIterator][mapObj["contact"]]) : "";
+                    for(let key in mapObj) {
+                        tempUserObj[key] = csvArray[arrayIterator][mapObj[key]] ? csvArray[arrayIterator][mapObj[key]] : "";
+                    }
+                    // tempUserObj["name"] = csvArray[arrayIterator][mapObj["name"]] ? csvArray[arrayIterator][mapObj["name"]] : "";
+                    // tempUserObj["email"] = csvArray[arrayIterator][mapObj["email"]] ? (csvArray[arrayIterator][mapObj["email"]]) : "";
+                    // tempUserObj["contact"] = csvArray[arrayIterator][mapObj["contact"]] ? (csvArray[arrayIterator][mapObj["contact"]]) : "";
                     tempUserObj["addedBy"] = addedBy;
                     tempUserObj["password"] = bcrypt.hashSync("password", 8);
                     usersEmail[tempUserObj["email"]] = 1;

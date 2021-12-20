@@ -1,17 +1,17 @@
 const userEventHandler = function (){
 
     this.init = function(){
-        _this.showUsers();
-        _this.showFiles();
-        _this.addUser();
-        _this.logoutUser();
-        _this.exportUser();
-        _this.importFile();
-        _this.mapFile();
-        _this.cancelMapFile();
-        _this.cancelMapChoices();
-        _this.confirmMapChoices();
-        _this.cancelMessage();
+        this.showUsers();
+        this.showFiles();
+        this.addUser();
+        this.logoutUser();
+        this.exportUser();
+        this.importFile();
+        this.mapFile();
+        this.cancelMapFile();
+        this.cancelMapChoices();
+        this.confirmMapChoices();
+        this.cancelMessage();
     };
 
     // send request to get users data
@@ -198,19 +198,24 @@ const userEventHandler = function (){
                         }
                         for(let i = 0; i < totalDropDown; i++){
                             $("select."+i).change(function(){
+
+                                if($("select."+i).val() == "addDataFeild") {
+                                    let addDataFeildValue = prompt("Enter the name of data feild to be added...");
+                                    _this.addNewDataFeild(addDataFeildValue, i);
+
+                                }
+
                                 let valueEnable = demo[$("select."+i).attr('class')];
                                 demo[$("select."+i).attr('class')] = $("select."+i).val();
                                 let valueDisable = $("select."+i).val();
                                 for(let j = 0; j < totalDropDown; j++){
-                                    if(valueDisable != "" && j != i){
+                                    if(valueDisable != "" && valueDisable != "addDataFeild" && j != i){
                                         $("select."+j).children("option[value='"+ valueDisable +"']").prop('disabled', true);
                                     }
                                     $("select."+j).children("option[value='"+ valueEnable +"']").prop('disabled', false);
                                 }
-                                console.log(JSON.stringify(demo));
                             });
                         }
-                        
                     } else {
                         $("p#errorMessageFile").html(res.message);
                     }
@@ -219,51 +224,54 @@ const userEventHandler = function (){
         });
     }
 
+    // Allow user to add dynamic feilds in mapping process.
+    this.addNewDataFeild = function (addDataFeildValue, selectTagIterator) {
+        console.log("addDataFeildValue  ",addDataFeildValue, "   selectTagIterator   ", selectTagIterator);
+        $.ajax({
+            url : '/api/addNewDataFeild',
+            type : 'post',
+            headers: {
+                'authToken': document.cookie.split("=")[1]
+            },
+            data : {
+                key : addDataFeildValue
+            },
+            dataType : 'json',
+            success : function (res) {
+                if(res.code == 200) {
+                    let totalDropDown = $("select").length;
+                    for(let i = 0; i < totalDropDown; i++){
+                        if(i == selectTagIterator){
+                            $("select."+i).append(`<option value="${addDataFeildValue}" selected>${addDataFeildValue}</option>`);
+                        } else {
+                            $("select."+i).append(`<option value="${addDataFeildValue}" disabled>${addDataFeildValue}</option>`);
+                        }
+                    }
+                } else {
+                    $("p#errorMessageFile").html(res.message);
+                }
+            }
+        });
+    }
+
     // Map csv headers with db feilds according to user's validated choices and send request to upload data to db.
     this.mapFile = function () {
         $(document).off('click', "#mapBtn").on('click', "#mapBtn", function () {
-            
-            // let multiplefeildSelectFlag = false;
             for( let i = 0; i < $("#mapTable > tbody > tr").length; i++ ){
-                // console.log($("select."+i).val(), " ",$("select."+i).val().trim().length );
                 if($("select." + i).val().length != 0){
-                    // if(mapHeaderObj[$("select."+i).val().trim()]){
-                    //     multiplefeildSelectFlag = true;
-                    // }
                     mapHeaderObj[$("select."+i).val().trim()] = $("select."+i).attr('id').trim();
                 }
+                console.log(JSON.stringify(mapHeaderObj));
             }
             if((mapHeaderObj["email"]) || (mapHeaderObj["contact"])){
-                // if(multiplefeildSelectFlag){
-                //     $("#warningMessage").html(`Thanks for uploading file.<br>
-                //         Selecting same data feild multiple times will consider the last one.We recommend you to reconsider your choices.<br>
-                //         Other wise mapping will follow the following pattern.<br>`);
-                //     let htmlStr = `<table class="table">
-                //                         <thead>
-                //                             <tr>
-                //                                 <th>Data Feild</th>
-                //                                 <th>CSV header in consideration</th>
-                //                             </tr>
-                //                         </thead>
-                //                         <tbody>
-                //         `;
-                //     for(let key of Object.keys(mapHeaderObj)){
-                //         htmlStr += `<tr><td>` + key + `</td><td>` + mapHeaderObj[key] + `</td></tr>`;
-                //     }
-                //     htmlStr += `            </tr>
-                //                         </tbody>
-                //                     </table>
-                //                     <a id="okBtn" class="btn btn-primary" >Ok</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a id="cancelBtn" class="btn btn-secondary">Cancel</a>`;
-                //     $("#mapObjTable").html("");
-                //     $("#mapObjTable").html(htmlStr);
-                //     $(document).scrollTop($(document).height());
-                // } else {
-                    $("#mapObjTable").html("");
-                    $("#warningMessage").html("Thank you for uploading a file.Your request will be processed soon...");
-                    _this.uploadUsersToDB();
-                    $("div#mapFileDiv").html("");
-                    $("div.showUserDiv").css("pointer-events","all");
-                // }
+                $("#mapObjTable").html("");
+                $("#successMessageFile").html("Thank you for uploading a file.Your request will be processed soon...");
+                $(document).scrollTop(0);
+                // _this.uploadUsersToDB();
+                _this.showUsers();
+                _this.showFiles();
+                $("div#mapFileDiv").html("");
+                $("div.showUserDiv").css("pointer-events","all");
             } else {
                 $("#warningMessage").html("You must map csv header with either email or contact no.");
             }
@@ -294,8 +302,11 @@ const userEventHandler = function (){
     this.confirmMapChoices = function () {
         $(document).off('click', "#okBtn").on('click', "#okBtn", function () {
             $("#mapObjTable").html("");
-            $("#warningMessage").html("Thank you for uploading a file.Your request will be processed soon...");
-            _this.uploadUsersToDB();
+            $("#successMessageFile").html("Thank you for uploading a file.Your request will be processed soon...");
+            $(document).scrollTop(0);
+            // _this.uploadUsersToDB();
+            _this.showUsers();
+            _this.showFiles();
             $("div#mapFileDiv").html("");
             $("div.showUserDiv").css("pointer-events","all");
         });

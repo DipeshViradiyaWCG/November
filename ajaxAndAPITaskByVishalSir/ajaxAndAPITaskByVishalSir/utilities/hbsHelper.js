@@ -31,7 +31,8 @@ exports.renderMapTable = function (headerArray, demoEntryArray, dbFeildArray, op
                     `;
         }
                   
-        htmlStr += `            </select>
+        htmlStr += `                <option value="addDataFeild">--Add a new data feild--</option>
+                                </select>
                             </td>
                     </tr>`;
     }

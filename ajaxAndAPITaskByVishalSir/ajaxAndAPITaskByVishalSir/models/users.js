@@ -9,6 +9,6 @@ let userSchema = mongoose.Schema({
         type : mongoose.Schema.Types.ObjectId,
         ref : 'csvFiles'
     }
-});
+}, { strict: false } );
 
 module.exports = mongoose.model("users", userSchema);

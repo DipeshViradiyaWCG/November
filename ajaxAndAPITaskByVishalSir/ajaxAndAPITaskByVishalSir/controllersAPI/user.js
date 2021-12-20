@@ -4,13 +4,16 @@ const { validationResult } = require('express-validator');
 const { Parser } = require('json2csv');
 const moment = require("moment");
 const fs = require('fs');
+const byline = require('byline');
 const csv = require("csvtojson");
 
 const { validateCsvData } = require("../utilities/validateCsvData");
+const { readFirstTwoRowCsv } = require("../utilities/readFirstTwoRowCsv");
 
 // requiring db model
 const userModel = require("../models/users");
 const csvFileModel = require("../models/csvFiles");
+const feildModel = require("../models/fields");
 
 // verify user credentials and generate token
 exports.postLoginAPI = async function (req, res, next) {
@@ -122,40 +125,51 @@ exports.postAddUserAPI = async function (req, res, next) {
 // convert file from csv to json and send first two rows and db feilds for mapping
 exports.postImportFileAPI = async function (req, res, next) {
     try {
-        let result = await csv().fromFile("public/importedCsvFiles/" + req.file.filename);
+        
+        // await readFirstTwoRowCsv( (fs.createReadStream("public/importedCsvFiles/" + req.file.filename)), (index) => {
+        //     index == 0 ? fs.createWriteStream(`public/importedCsvFiles/output-${req.file.filename}`) :  fs.createWriteStream(`output-hell.csv`);
+        // });
+
+        let result = await csv().fromFile(`public/importedCsvFiles/${req.file.filename}`);
 
         // An aggregation query to generate array of db collection feilds
-        let collectionFeildsList = await userModel.aggregate([
-            {
-                "$project" : {
-                    "arrayofkeyvalue" : {
-                        "$objectToArray" : "$$ROOT"
-                    }
-                }
-            },{
-                "$unwind" : "$arrayofkeyvalue"
-            },{
-                "$group" : { 
-                    "_id" : null,
-                    "allkeys" : {
-                        "$addToSet" : "$arrayofkeyvalue.k"
-                    }
-                }
-            }
-        ]);
-        collectionFeildsList = collectionFeildsList[0]["allkeys"];
+        // let collectionFeildsList = await userModel.aggregate([
+        //     {
+        //         "$project" : {
+        //             "arrayofkeyvalue" : {
+        //                 "$objectToArray" : "$$ROOT"
+        //             }
+        //         }
+        //     },{
+        //         "$unwind" : "$arrayofkeyvalue"
+        //     },{
+        //         "$group" : { 
+        //             "_id" : null,
+        //             "allkeys" : {
+        //                 "$addToSet" : "$arrayofkeyvalue.k"
+        //             }
+        //         }
+        //     }
+        // ]);
+        // collectionFeildsList = collectionFeildsList[0]["allkeys"];
         
-        collectionFeildsList.splice(collectionFeildsList.indexOf("_id"),1);
-        collectionFeildsList.splice(collectionFeildsList.indexOf("__v"),1);
+        // collectionFeildsList.splice(collectionFeildsList.indexOf("_id"),1);
+        // collectionFeildsList.splice(collectionFeildsList.indexOf("__v"),1);
+        // collectionFeildsList.splice(collectionFeildsList.indexOf("password"),1);
+        // collectionFeildsList.splice(collectionFeildsList.indexOf("addedBy"),1);
+        // collectionFeildsList.map((value) => value.trim());
+
+        let dbFeilds = await feildModel.find().lean();
+        let collectionFeildsList = dbFeilds.map((obj) => obj.key);
         collectionFeildsList.splice(collectionFeildsList.indexOf("password"),1);
         collectionFeildsList.splice(collectionFeildsList.indexOf("addedBy"),1);
-        collectionFeildsList.map((value) => value.trim());
+
         let csvFileObj = await csvFileModel.create({
             name : req.file.filename,
             path : "public/importedCsvFiles/" + req.file.filename,
             uploadedBy : req.user._id
         });
-
+        
         res.render('csvMapTable', { 
             collectionFeildsList, 
             firstRow : Object.keys(result[0]).map((value) => value.trim()),
@@ -163,11 +177,26 @@ exports.postImportFileAPI = async function (req, res, next) {
             fileUploaded : req.file.filename, 
             fileId : csvFileObj._id 
         });
+            
     } catch (error) {
         console.log(error);
         return res.json({ status : "error", code : 404, message : config.errorMessages[404] });
     }
 };
+
+// Allow user to add new data feilds to DB.
+exports.postAddNewDataFeildAPI = async function (req, res, next) {
+    try {
+        let feildObj = await feildModel.findOne(req.body);
+        if(feildObj == null) {
+            await feildModel.create(req.body);
+        }
+        return res.json({ status : "success", code : 200 });
+    } catch (error) {
+        console.log(error);
+        return res.json({ status : "error", code : 404, message : config.errorMessages[404] });
+    }
+}
 
 // Validate csv file data and map it with user's choice, Upload valid data to DB, send confirmation to user.
 exports.postMapAndUploadUsersAPI = async function (req, res, next) {
