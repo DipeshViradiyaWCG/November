@@ -33,6 +33,10 @@ let csvFileSchema = mongoose.Schema({
     status : {
         type : String,
         default : "pending"
+    },
+    hasHeaders : {
+        type : Boolean,
+        default : true
     }
 }, { timestamps : true } );
 

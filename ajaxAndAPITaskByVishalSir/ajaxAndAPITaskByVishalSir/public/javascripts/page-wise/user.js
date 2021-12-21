@@ -46,7 +46,9 @@ const userEventHandler = function (){
                     for(let ele of $("td")){
                         if($(ele).html() == "pending"){
                            $(ele).attr("class", "text-danger");
-                        } else if($(ele).html() == "uploaded") {
+                        } else if($(ele).html() == "in progress") {
+                            $(ele).attr("class", "text-info");
+                        } else if ($(ele).html() == "uploaded") {
                             $(ele).attr("class", "text-success");
                         }
                     }
@@ -200,8 +202,55 @@ const userEventHandler = function (){
                             $("select."+i).change(function(){
 
                                 if($("select."+i).val() == "addDataFeild") {
-                                    let addDataFeildValue = prompt("Enter the name of data feild to be added...");
-                                    _this.addNewDataFeild(addDataFeildValue, i);
+
+
+
+
+
+                                    $.confirm({
+                                        title: 'Add a new data feild',
+                                        content: '' +
+                                        '<form action="" class="formName">' +
+                                        '<div class="form-group">' +
+                                        '<label>Enter Data feild name <span class="text-danger">*</span> : </label>' +
+                                        '<input type="text" class="name form-control" required />' +
+                                        '</div>' +
+                                        '</form>',
+                                        buttons: {
+                                            formSubmit: {
+                                                text: 'Submit',
+                                                btnClass: 'btn-blue',
+                                                action: function () {
+                                                    var addDataFeildValue = this.$content.find('.name').val();
+                                                    if(!addDataFeildValue){
+                                                        $.alert('provide a valid data feild name');
+                                                        return false;
+                                                    }
+                                                    _this.addNewDataFeild(addDataFeildValue, i);
+                                                }
+                                            },
+                                            cancel: function () {
+                                                //close
+                                            },
+                                        }
+                                        // onContentReady: function () {
+                                        //     // bind to events
+                                        //     var jc = this;
+                                        //     this.$content.find('form').on('submit', function (e) {
+                                        //         // if the user submits the form by pressing enter in the field.
+                                        //         e.preventDefault();
+                                        //         jc.$$formSubmit.trigger('click'); // reference the button and click it
+                                        //     });
+                                        // }
+                                    });
+
+
+
+
+
+
+                                    // let addDataFeildValue = prompt("Enter the name of data feild to be added...");
+                                    // _this.addNewDataFeild(addDataFeildValue, i);
 
                                 }
 
@@ -242,9 +291,9 @@ const userEventHandler = function (){
                     let totalDropDown = $("select").length;
                     for(let i = 0; i < totalDropDown; i++){
                         if(i == selectTagIterator){
-                            $("select."+i).append(`<option value="${addDataFeildValue}" selected>${addDataFeildValue}</option>`);
+                            $("select." + i + " option[value='addDataFeild']").before(`<option value="${addDataFeildValue}" selected>${addDataFeildValue}</option>`);
                         } else {
-                            $("select."+i).append(`<option value="${addDataFeildValue}" disabled>${addDataFeildValue}</option>`);
+                            $("select." + i + " option[value='addDataFeild']").before(`<option value="${addDataFeildValue}" disabled>${addDataFeildValue}</option>`);
                         }
                     }
                 } else {
@@ -267,7 +316,7 @@ const userEventHandler = function (){
                 $("#mapObjTable").html("");
                 $("#successMessageFile").html("Thank you for uploading a file.Your request will be processed soon...");
                 $(document).scrollTop(0);
-                // _this.uploadUsersToDB();
+                _this.uploadUsersToDB();
                 _this.showUsers();
                 _this.showFiles();
                 $("div#mapFileDiv").html("");
@@ -304,7 +353,7 @@ const userEventHandler = function (){
             $("#mapObjTable").html("");
             $("#successMessageFile").html("Thank you for uploading a file.Your request will be processed soon...");
             $(document).scrollTop(0);
-            // _this.uploadUsersToDB();
+            _this.uploadUsersToDB();
             _this.showUsers();
             _this.showFiles();
             $("div#mapFileDiv").html("");
@@ -315,7 +364,7 @@ const userEventHandler = function (){
     // Send request to validate and upload user data.
     this.uploadUsersToDB = function () {
         $.ajax({
-            url : '/api/uploadUsersToDB?fileUploaded=' + $("p.fileUploaded").attr('id') + "&fileId=" + $("p.fileId").attr('id'),
+            url : '/api/uploadUsersToDB?fileUploaded=' + $("p.fileUploaded").attr('id') + '&hasHeaders=' + $("#hasHeaders").prop('checked'),// + "&fileId=" + $("p.fileId").attr('id'),
             type : 'post',
             headers: {
                 'authToken': document.cookie.split("=")[1]
@@ -326,7 +375,7 @@ const userEventHandler = function (){
                 if(res.code == 200){
                     $("#mapObjTable").html("");
                     $("#warningMessage").html("");
-                    $("#successMessageFile").html(`<button class="btn btn-secondary" id="messageClose"><h6>X<h6></button>` + res.message);
+                    $("#successMessageFile").html(`<button class="btn btn-secondary" id="messageClose"><h6>X<h6></button><br>Thank you for uploading a file.Your request will be processed soon...`);
                     _this.showUsers();
                     _this.showFiles();
                     $("#importForm")[0].reset();
@@ -343,6 +392,11 @@ const userEventHandler = function (){
             $("#successMessageFile").html("");
         });
     }
+
+    setInterval(() => {
+        this.showUsers();
+        this.showFiles();
+    }, 7000);
 
     let _this = this;
     let mapHeaderObj = {};

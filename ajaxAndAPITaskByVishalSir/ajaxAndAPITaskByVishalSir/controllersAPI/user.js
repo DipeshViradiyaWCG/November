@@ -4,7 +4,6 @@ const { validationResult } = require('express-validator');
 const { Parser } = require('json2csv');
 const moment = require("moment");
 const fs = require('fs');
-const byline = require('byline');
 const csv = require("csvtojson");
 
 const { validateCsvData } = require("../utilities/validateCsvData");
@@ -126,11 +125,14 @@ exports.postAddUserAPI = async function (req, res, next) {
 exports.postImportFileAPI = async function (req, res, next) {
     try {
         
-        // await readFirstTwoRowCsv( (fs.createReadStream("public/importedCsvFiles/" + req.file.filename)), (index) => {
-        //     index == 0 ? fs.createWriteStream(`public/importedCsvFiles/output-${req.file.filename}`) :  fs.createWriteStream(`output-hell.csv`);
-        // });
+        await readFirstTwoRowCsv( (fs.createReadStream("public/importedCsvFiles/" + req.file.filename)), (index) => {
+            if(index == 0){
+                return fs.createWriteStream(`public/importedCsvFiles/firstTwoRow-${req.file.filename}`);
+            }
+            return fs.createWriteStream(`output-hell.csv`);
+        });
 
-        let result = await csv().fromFile(`public/importedCsvFiles/${req.file.filename}`);
+        let result = await csv().fromFile(`public/importedCsvFiles/firstTwoRow-${req.file.filename}`);
 
         // An aggregation query to generate array of db collection feilds
         // let collectionFeildsList = await userModel.aggregate([
@@ -164,18 +166,18 @@ exports.postImportFileAPI = async function (req, res, next) {
         collectionFeildsList.splice(collectionFeildsList.indexOf("password"),1);
         collectionFeildsList.splice(collectionFeildsList.indexOf("addedBy"),1);
 
-        let csvFileObj = await csvFileModel.create({
-            name : req.file.filename,
-            path : "public/importedCsvFiles/" + req.file.filename,
-            uploadedBy : req.user._id
-        });
+        // let csvFileObj = await csvFileModel.create({
+        //     name : req.file.filename,
+        //     path : "public/importedCsvFiles/" + req.file.filename,
+        //     uploadedBy : req.user._id
+        // });
         
         res.render('csvMapTable', { 
             collectionFeildsList, 
-            firstRow : Object.keys(result[0]).map((value) => value.trim()),
-            secondRow : Object.values(result[0]).map((value) => value.trim()), 
+            firstRow : Object.keys(result[0]).map((value) => value.toString().trim()),
+            secondRow : Object.values(result[0]).map((value) => value.toString().trim()), 
             fileUploaded : req.file.filename, 
-            fileId : csvFileObj._id 
+            // fileId : csvFileObj._id 
         });
             
     } catch (error) {
@@ -201,29 +203,37 @@ exports.postAddNewDataFeildAPI = async function (req, res, next) {
 // Validate csv file data and map it with user's choice, Upload valid data to DB, send confirmation to user.
 exports.postMapAndUploadUsersAPI = async function (req, res, next) {
     try {
-        let result = await csv().fromFile("public/importedCsvFiles/" + req.query.fileUploaded);
-        let validatedUsersData = await validateCsvData(result, req.body, req.query.fileId);
+        // let result = await csv().fromFile("public/importedCsvFiles/" + req.query.fileUploaded);
+        // let validatedUsersData = await validateCsvData(result, req.body, req.query.fileId);
 
-        if(validatedUsersData.validUserData.length > 0){
-            await userModel.insertMany(validatedUsersData.validUserData);
-        }
-        await csvFileModel.updateOne({ _id : req.query.fileId} , {
+        // if(validatedUsersData.validUserData.length > 0){
+        //     await userModel.insertMany(validatedUsersData.validUserData);
+        // }
+
+        let csvFileObj = await csvFileModel.create({
+            name : req.query.fileUploaded,
+            path : "public/importedCsvFiles/" + req.query.fileUploaded,
+            uploadedBy : req.user._id,
             mapObject : req.body,
-            totalRecords : result.length,
-            duplicates : validatedUsersData.duplicateEntryCount,
-            discarded : validatedUsersData.duplicateEntryInCsvCount,
-            totalUploaded : validatedUsersData.validUserData.length,
-            status : "uploaded"
-        })
-        let message = `<br>Thank you for uploading data file.<br>
-            Out of total ${result.length} records, we found,<br>
-            ${validatedUsersData.invalidEntryCount} Invalid data entries,<br>
-            ${validatedUsersData.validEntryCount} Valid data entries,<br>
-            Out of which ${validatedUsersData.duplicateEntryCount} records were already in existance,<br>
-            We also ignored ${validatedUsersData.duplicateEntryInCsvCount} records which were duplicates in csv file itself... :)<br>
-            We added total ${validatedUsersData.validUserData.length} records to database.`;
+        });
 
-        return res.json({ status : "success", code : 200, message });
+        // await csvFileModel.updateOne({ _id : req.query.fileId} , {
+        //     mapObject : req.body,
+        //     totalRecords : result.length,
+        //     duplicates : validatedUsersData.duplicateEntryCount,
+        //     discarded : validatedUsersData.duplicateEntryInCsvCount,
+        //     totalUploaded : validatedUsersData.validUserData.length,
+        //     status : "uploaded"
+        // })
+        // let message = `<br>Thank you for uploading data file.<br>
+        //     Out of total ${result.length} records, we found,<br>
+        //     ${validatedUsersData.invalidEntryCount} Invalid data entries,<br>
+        //     ${validatedUsersData.validEntryCount} Valid data entries,<br>
+        //     Out of which ${validatedUsersData.duplicateEntryCount} records were already in existance,<br>
+        //     We also ignored ${validatedUsersData.duplicateEntryInCsvCount} records which were duplicates in csv file itself... :)<br>
+        //     We added total ${validatedUsersData.validUserData.length} records to database.`;
+
+        return res.json({ status : "success", code : 200 });
 
     } catch (error) {
         console.log(error);

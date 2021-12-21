@@ -52,6 +52,19 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// const http = require("http").createServer(app);
+// let io = require("socket.io")(http);
+
+// var cors = require('cors')
+// app.use(cors({
+//   origin: 'http://localhost:3000',
+//   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+// }));
+
+// io.on('connection', (socket) => {
+//     console.log('a user connected');
+// });
+
 app.use('/', indexRouter);
 app.use('/api', apiRouter);
 

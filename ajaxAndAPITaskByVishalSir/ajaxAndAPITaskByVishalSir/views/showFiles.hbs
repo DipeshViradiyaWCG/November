@@ -3,6 +3,9 @@
     <thead>
         <tr>
             <th scope="col"> Name </th>
+            <th scope="col"> Total records </th>
+            <th scope="col"> Duplicate records </th>
+            <th scope="col"> Discarded records </th>
             <th scope="col"> Total records uploaded </th>
             <th scope="col"> Status </th>
             <th scope="col"> Uploaded At </th>
@@ -12,6 +15,9 @@
         {{#each files}}
             <tr>
                 <td>{{name}}</td>
+                <td>{{totalRecords}}</td>
+                <td>{{duplicates}}</td>
+                <td>{{discarded}}</td>
                 <td>{{totalUploaded}}</td>
                 <td>{{status}}</td>
                 <td>{{formatTime createdAt}}</td>

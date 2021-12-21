@@ -1,9 +1,11 @@
 <h3>Map the csv header with data feilds</h3>
 <p id="{{fileUploaded}}" class="fileUploaded" hidden></p>
-<p id="{{fileId}}" class="fileId" hidden></p>
+{{!-- <p id="{{fileId}}" class="fileId" hidden></p> --}}
 {{#renderTable firstRow secondRow collectionFeildsList}}
     {{this}}
 {{/renderTable}}
+<br>
+<input type="checkbox" name="hasHeaders" id="hasHeaders">&nbsp;&nbsp;Skip the first row of csv as header.
 <br>
 <a id="mapBtn" class="btn btn-primary">Add Users</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a id="mapCancelBtn" class="btn btn-secondary">Cancel</a>
 <p id="warningMessage" class="text-primary"></p>

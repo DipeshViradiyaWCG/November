@@ -307,14 +307,16 @@ function demo(a){
   return new Promise((resolve, reject) => {
     if(a>0){
       resolve(a);
+      console.log("jk");
+      reject(1);
+      console.log(4545);
     }
-    reject(1);
   })
 }
 
 (async function whatever(){
   try {
-    let abc = await demo(-3);
+    let abc = await demo(3);
     console.log(abc);
     
   } catch (error) {
