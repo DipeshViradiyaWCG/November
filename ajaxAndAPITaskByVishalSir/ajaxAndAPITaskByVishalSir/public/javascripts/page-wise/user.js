@@ -1,6 +1,7 @@
 const userEventHandler = function (){
 
     this.init = function(){
+        // this.socket = io.connect('http://localhost:4000', { transports : ['websocket']});
         this.showUsers();
         this.showFiles();
         this.addUser();
@@ -12,6 +13,7 @@ const userEventHandler = function (){
         this.cancelMapChoices();
         this.confirmMapChoices();
         this.cancelMessage();
+        this.socketEventListeners();
     };
 
     // send request to get users data
@@ -101,8 +103,8 @@ const userEventHandler = function (){
                         password : $("#password").val()
                     },
                     dataType : 'json',
+                    
                     success : function (res) {
-                        console.log(res);
                         if (res.code == 200){
                             _this.showUsers();
                         } else {
@@ -184,9 +186,30 @@ const userEventHandler = function (){
                 contentType: false,
                 processData: false,
                 data: fd,
+                xhr: function () {
+                    var myXhr = $.ajaxSettings.xhr();
+                    console.log("myXhr ===============> ");
+                    console.log(myXhr);
+
+                    $("input#importFile").parent().append("<div class=\"file-upload-status\"><input type=\"range\" id=\"importFileRange\" min=\"0\" max=\"100\" value=\"\" step=\"50\" /> <span id=\"spanImportFileRange\"></span> % </div><br>");
+                    if (myXhr.upload) {
+                        myXhr.upload.addEventListener('progress', function (event) {
+                                var percent = 0;
+                                var position = event.loaded || event.position;
+                                var total = event.total;
+                                if (event.lengthComputable) {
+                                    percent = Math.ceil(position / total * 100);
+                                }
+                                $("#spanImportFileRange").html(percent);
+                                $("input#importFileRange").attr("value", percent.toString());
+                        }, false);
+                    }
+                    return myXhr;
+                },
                 success: function (res) {
                     $("p#errorMessageFile").html("");
                     if (!res.code) {
+                        $("div.file-upload-status").remove();
                         $("#mapFileDiv").html(res);
                         $("div.showUserDiv").css("pointer-events","none");
                         $(document).scrollTop($(document).height());
@@ -202,10 +225,6 @@ const userEventHandler = function (){
                             $("select."+i).change(function(){
 
                                 if($("select."+i).val() == "addDataFeild") {
-
-
-
-
 
                                     $.confirm({
                                         title: 'Add a new data feild',
@@ -233,24 +252,7 @@ const userEventHandler = function (){
                                                 //close
                                             },
                                         }
-                                        // onContentReady: function () {
-                                        //     // bind to events
-                                        //     var jc = this;
-                                        //     this.$content.find('form').on('submit', function (e) {
-                                        //         // if the user submits the form by pressing enter in the field.
-                                        //         e.preventDefault();
-                                        //         jc.$$formSubmit.trigger('click'); // reference the button and click it
-                                        //     });
-                                        // }
                                     });
-
-
-
-
-
-
-                                    // let addDataFeildValue = prompt("Enter the name of data feild to be added...");
-                                    // _this.addNewDataFeild(addDataFeildValue, i);
 
                                 }
 
@@ -275,7 +277,6 @@ const userEventHandler = function (){
 
     // Allow user to add dynamic feilds in mapping process.
     this.addNewDataFeild = function (addDataFeildValue, selectTagIterator) {
-        console.log("addDataFeildValue  ",addDataFeildValue, "   selectTagIterator   ", selectTagIterator);
         $.ajax({
             url : '/api/addNewDataFeild',
             type : 'post',
@@ -310,7 +311,6 @@ const userEventHandler = function (){
                 if($("select." + i).val().length != 0){
                     mapHeaderObj[$("select."+i).val().trim()] = $("select."+i).attr('id').trim();
                 }
-                console.log(JSON.stringify(mapHeaderObj));
             }
             if((mapHeaderObj["email"]) || (mapHeaderObj["contact"])){
                 $("#mapObjTable").html("");
@@ -393,12 +393,32 @@ const userEventHandler = function (){
         });
     }
 
-    setInterval(() => {
-        this.showUsers();
-        this.showFiles();
-    }, 7000);
+    this.socketEventListeners = function () {
+        socket.on("fileInProgress", (csvFileId, csvFileName) => {
+            $("td#"+csvFileId).html('in progress').attr("class","text-info");
+            $.notify("We are processing " + csvFileName + "file now...", "warn");
+            $("td#"+csvFileId).append(`<div class="progress">
+                                            <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>`);
+        });
+
+        socket.on("fileProgressPersentage", (progressPercentage, csvFileId) => {
+            if(progressPercentage != null){
+                $("div.progress-bar").css("width", ""+parseInt(progressPercentage)+"%").prop("aria-valuenow", ""+parseInt(progressPercentage)).html(""+ parseInt(progressPercentage) +"%");
+            }
+        });
+
+        socket.on("fileUploaded", (csvFileId, csvFileName) => {
+            $("td#"+csvFileId).html('uploaded').attr("class","text-success");
+            $.notify("We have successfully uploaded " + csvFileName + "file", "success");
+            $("div.progress-bar").remove();
+            this.showUsers();
+            this.showFiles(); 
+        });
+    }
 
     let _this = this;
     let mapHeaderObj = {};
+    var socket = io.connect('http://127.0.0.1:3001', {secure: true,    rejectUnauthorized: false , transports : ['websocket']});
     this.init();    
 }

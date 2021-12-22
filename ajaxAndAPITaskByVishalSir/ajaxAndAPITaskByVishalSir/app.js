@@ -52,12 +52,25 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// const http = require("http").createServer(app);
-// let io = require("socket.io")(http);
+const http = require('http');
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server);
 
 // var cors = require('cors')
+
+// app.use(cors());
+
+// app.use(function (req, res, next) {
+//   res.header('Access-Control-Allow-Origin', '*');
+//   res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+//   res.header('Access-Control-Allow-Headers', req.headers['access-control-request-headers']);
+//   next();
+// });
+
+
 // app.use(cors({
-//   origin: 'http://localhost:3000',
+//   origin: 'http://localhost:3000/users',
 //   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 // }));
 
@@ -87,4 +100,8 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
+app.listen(3000, function(){
+  console.log("server start");
+})
+
+// module.exports = app;

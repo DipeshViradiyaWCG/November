@@ -4,8 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "serverAndCron": "node ./bin/www & node cron.js",
-    "cron": "node cron.js"
+    "serverAndCron": "node ./bin/www & node cron.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -13,8 +12,8 @@
     "cookie-parser": "~1.4.4",
     "cors": "^2.8.5",
     "cron": "^1.8.2",
-    "csv-split-stream": "^1.0.2",
     "csvtojson": "^2.0.10",
+    "custom-env": "^2.0.1",
     "debug": "~2.6.9",
     "express": "~4.16.1",
     "express-handlebars": "^5.3.4",
@@ -23,13 +22,11 @@
     "http-errors": "~1.6.3",
     "json2csv": "^5.0.6",
     "jsonwebtoken": "^8.5.1",
-    "lazy": "^1.0.11",
     "moment": "^2.29.1",
     "mongoose": "^6.1.1",
     "morgan": "~1.9.1",
     "multer": "^1.4.3",
-    "pm2": "^5.1.2",
-    "readline": "^1.3.0",
-    "socket.io": "^4.4.0"
+    "socket.io": "^4.4.0",
+    "uuid": "^8.3.2"
   }
 }

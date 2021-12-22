@@ -303,33 +303,41 @@
 
 
 
-function demo(a){
-  return new Promise((resolve, reject) => {
-    if(a>0){
-      resolve(a);
-      console.log("jk");
-      reject(1);
-      console.log(4545);
-    }
-  })
-}
+// function demo(a){
+//   return new Promise((resolve, reject) => {
+//     if(a>0){
+//       resolve(a);
+//       console.log("jk");
+//       reject(1);
+//       console.log(4545);
+//     }
+//   })
+// }
 
-(async function whatever(){
-  try {
-    let abc = await demo(3);
-    console.log(abc);
+// (async function whatever(){
+//   try {
+//     let abc = await demo(3);
+//     console.log(abc);
     
-  } catch (error) {
-    console.log(error);
-  }
-})();
+//   } catch (error) {
+//     console.log(error);
+//   }
+// })();
+
+const uuid = require('uuid');
+let idd = uuid.v4();
+console.log("idd ----- > ", idd);
+console.log(uuid.parse(idd));
+console.log(uuid.stringify(uuid.parse(idd)));
+console.log(uuid.validate(idd));
 
 
 
+require('custom-env').env()
 
-
-
-
+console.log(process.env.USER_NAME);
+console.log(process.env.USER_PASSWORD);
+console.log(process.env.DEMO_TEXT);
 
 
 

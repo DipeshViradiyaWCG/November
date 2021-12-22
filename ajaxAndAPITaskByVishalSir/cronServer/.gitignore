@@ -59,10 +59,3 @@ typings/
 
 # next.js build output
 .next
-
-views/test.hbs
-public/csvFiles
-public/importedCsvFiles
-1_Mil.csv
-output-hell.csv
-.env

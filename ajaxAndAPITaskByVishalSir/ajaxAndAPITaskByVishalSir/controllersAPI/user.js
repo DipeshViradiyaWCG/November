@@ -84,7 +84,7 @@ exports.getShowUsersAPI = async function (req, res, next) {
 // get files data from db
 exports.getShowFilesAPI = async function (req, res, next) {
     try {
-        let files = await csvFileModel.find({},{mapObject : 0, path : 0, skipFirstRow : 0, _id : 0}).lean();
+        let files = await csvFileModel.find({},{mapObject : 0, path : 0, skipFirstRow : 0}).lean();
         return res.render('showFiles', { files });
     } catch (error) {
         console.log(error);

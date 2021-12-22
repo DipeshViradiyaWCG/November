@@ -2,16 +2,14 @@ var createError = require('http-errors');
 const fs = require("fs");
 const { promisify } = require("util");
 var express = require('express');
-var app = express();
+let app = express();
+const http = require('http');
 
-const http = require("http").createServer(app);
-let io = require("socket.io")(http);
+var server = http.createServer(app);
 
-var cors = require('cors')
-app.use(cors());
-
+let io = require("socket.io")(server);
 io.on('connection', (socket) => {
-    console.log('a user connected');
+  console.log('a user connected');
 });
 
 global.config = require("./config");
@@ -37,6 +35,6 @@ mongoose.connect(`mongodb://${config.mongodb.databaseUsername}:${config.mongodb.
     (err) => {throw err;}
 );
 
-app.listen(3001, () => {
-    console.log("cron is running on 3001");
+app.listen(4000, () => {
+    console.log("cron is running on 4000 ");
 });

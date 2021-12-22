@@ -1,0 +1,15 @@
+{
+    "scheduler":"on",
+    "files":{
+        "cronDemo1":{
+            "time":"*/1 * * * * *",
+            "name":"cronDemo1.js",
+            "active":true
+        },
+        "cronDemo2":{
+            "time":"*/3 * * * * *",
+            "name":"cronDemo2.js",
+            "active":true
+        }
+    }
+}

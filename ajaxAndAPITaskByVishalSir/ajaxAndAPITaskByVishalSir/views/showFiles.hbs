@@ -13,13 +13,13 @@
     </thead>
     <tbody>
         {{#each files}}
-            <tr>
+            <tr class="{{_id}}">
                 <td>{{name}}</td>
                 <td>{{totalRecords}}</td>
                 <td>{{duplicates}}</td>
                 <td>{{discarded}}</td>
                 <td>{{totalUploaded}}</td>
-                <td>{{status}}</td>
+                <td id="{{_id}}">{{status}}</td>
                 <td>{{formatTime createdAt}}</td>
             </tr>
         {{/each}}
