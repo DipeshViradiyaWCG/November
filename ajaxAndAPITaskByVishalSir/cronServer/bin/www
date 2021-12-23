@@ -19,7 +19,6 @@ app.set('port', port);
  * Create HTTP server.
  */
 
-
 var server = http.createServer(app);
 
 
@@ -28,6 +27,21 @@ io.on('connection', (socket) => {
   global.socket = socket
   console.log('a user connected');
 });
+
+(async function runCronCode(){
+  try {
+      if(config.scheduler == "on"){
+        for(let keyOfFilesObj of Object.keys(config.files)){
+          if(config.files[keyOfFilesObj].active){
+            require("../cronFiles/" + config.files[keyOfFilesObj].name)({time : config.files[keyOfFilesObj].time});                  
+          }
+        }
+      }
+  } catch (error) {
+      console.log("Err in cron scheduling" + error);
+  }
+})();
+
 
 /**
  * Listen on provided port, on all network interfaces.

@@ -78,6 +78,24 @@ const io = new Server(server);
 //     console.log('a user connected');
 // });
 
+const redis = require("redis");
+
+(async () => {
+  try {
+      var client = redis.createClient({
+          url: 'redis://localhost:6379/0'
+      })
+      client.on('error', (err) => console.log('Redis Client Error', err));
+      await client.connect();
+      console.log("connected!..");
+      console.log("publishing");
+      await client.publish("demoPublish", "Hello this is publish data from port 3000");
+  } catch (error) {
+      console.log("error", error);
+  }
+})();
+
+
 app.use('/', indexRouter);
 app.use('/api', apiRouter);
 

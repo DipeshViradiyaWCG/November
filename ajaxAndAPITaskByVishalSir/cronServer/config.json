@@ -1,15 +1,25 @@
 {
-    "scheduler":"on",
+    "scheduler":"off",
     "files":{
         "cronDemo1":{
             "time":"*/1 * * * * *",
             "name":"cronDemo1.js",
-            "active":true
+            "active":false
         },
         "cronDemo2":{
             "time":"*/3 * * * * *",
             "name":"cronDemo2.js",
-            "active":true
+            "active":false
+        },
+        "uploadDataScheduler" : {
+            "time": "*/10 * * * * *",
+            "name": "uploadDataScheduler.js",
+            "active" : true
+        },
+        "cronDemo3" : {
+            "time": "*/1 * * * * *",
+            "name": "cronDemo3.js",
+            "active" : false
         }
     }
 }

@@ -324,20 +324,134 @@
 //   }
 // })();
 
-const uuid = require('uuid');
-let idd = uuid.v4();
-console.log("idd ----- > ", idd);
-console.log(uuid.parse(idd));
-console.log(uuid.stringify(uuid.parse(idd)));
-console.log(uuid.validate(idd));
+
+
+// const uuid = require('uuid');
+// let idd = uuid.v4();
+// console.log("idd ----- > ", idd);
+// console.log(uuid.parse(idd));
+// console.log(uuid.stringify(uuid.parse(idd)));
+// console.log(uuid.validate(idd));
 
 
 
-require('custom-env').env()
+// require('custom-env').env()
 
-console.log(process.env.USER_NAME);
-console.log(process.env.USER_PASSWORD);
-console.log(process.env.DEMO_TEXT);
+// console.log(process.env.USER_NAME);
+// console.log(process.env.USER_PASSWORD);
+// console.log(process.env.DEMO_TEXT);
+
+// var fs = require('fs');
+// const { promisify } = require("util");
+
+// let unlinkFileAsync = promisify(fs.unlink);
+
+// (async function deleteFile(){
+//     try {
+//         await unlinkFileAsync('./demo.txt');
+//     } catch (error) {
+//         console.log(error);
+//     }
+// })();
+
+// fs.unlink('./demo.txt', (err) => {
+//   if(err) throw err;
+//   console.log("removed.");
+// });
+
+
+// eval(`
+// console.log("koko)
+// `);
+// eval("console.log('abab')")
+
+// function abc(){
+//     console.log("abc");
+// }
+// abc();
+
+// (function def(){
+//     console.log("def");
+// })();
+
+// const redis = require('redis');
+// const client = redis.createClient();
+
+// client.on('connect', function() {
+//     console.log('Connected!');
+// });
+
+// client.get('key1');
+
+
+const redis = require("redis");
+
+(async () => {
+
+    try {
+        // const client = createClient();
+
+        var client = redis.createClient({
+            url: 'redis://localhost:6379/1'
+        })
+    
+         
+        client.on('error', (err) => console.log('Redis Client Error', err));
+      
+        await client.connect();
+  
+        console.log("connected!..");
+      
+        await client.hSet("hmsetKey", ["hmsetKey1", "hmsetValue1", "hmsetKey2", "hmsetValue2", "hmsetKey3", "hmsetValue3"]);
+        // await client.rPush('keyofListDDDEEEMMMOOO', 'A', 'B', 'A');
+        await client.sAdd('keyOfSetDDEEMMOO', ['A', 'B', 'A']);
+        // client.hSet
+      
+        // console.log(await client.get("key1"));
+        // console.log(await client.get("key2"));
+        // console.log(await client.get("key3"));
+        // console.log(await client.get("key4"));
+        // console.log(await client.get("key5"));
+        // console.log(await client.get("key6"));
+        // console.log(await client.get("key7"));
+        // console.log(await client.get("key8"));
+        // console.log(await client.hmGet("hmsetKey", "hmsetKey1"));
+
+        // console.log(client);
+
+        // let value = {
+        //     name:"sonu"
+        // };
+
+
+        // var value_array = [];
+        // for (i in value) {
+        //     value_array.push(i);
+        //     if (typeof value[i] == 'object') {
+        //         value[i] = JSON.stringify(value[i]);
+        //     }
+        //     value_array.push(value[i]);
+        // }
+
+        // client.hmset("JustForTest", value_array, function (err, res) {
+        //     if (err) {
+        //         console.log(err);
+        //     } else {
+        //         console.log(res);
+        //     }
+        // });
+        
+    } catch (error) {
+        console.log("error", error);
+    }
+
+
+})();
+
+
+
+
+
 
 
 

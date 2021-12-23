@@ -330,10 +330,24 @@ const userEventHandler = function (){
     // Allow user revert back uploaded csv file
     this.cancelMapFile = function () {
         $(document).off('click', "#mapCancelBtn").on('click', "#mapCancelBtn", function () {
-            $("#mapFileDiv").html("");
-            $("div.showUserDiv").css("pointer-events","all");
-            $("#importForm")[0].reset();
-            mapHeaderObj = {}
+            $.ajax({
+                url : '/api/deleteFile?fileName=' + $("p.fileUploaded").attr('id'),
+                type : 'get',
+                headers: {
+                    'authToken': document.cookie.split("=")[1]
+                },
+                success : function(res) {
+                    if(res.code == 200){
+                        $("#mapFileDiv").html("");
+                        $("div.showUserDiv").css("pointer-events","all");
+                        $("#importForm")[0].reset();
+                        mapHeaderObj = {}
+                    } else {
+                        $("#warningMessage").html(res.message);
+                    }
+                }
+            });
+
         });
     }
 
@@ -394,9 +408,15 @@ const userEventHandler = function (){
     }
 
     this.socketEventListeners = function () {
+
+        socket.on("fileProcessStarted", () => {
+            console.log("dddeeemmmooo");
+            $.notify("We are starting processing pending requests...     ", "info", { position:"right" });
+        });
+
         socket.on("fileInProgress", (csvFileId, csvFileName) => {
             $("td#"+csvFileId).html('in progress').attr("class","text-info");
-            $.notify("We are processing " + csvFileName + "file now...", "warn");
+            $.notify("We are processing " + csvFileName + " file now...     ", "warn");
             $("td#"+csvFileId).append(`<div class="progress">
                                             <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
                                         </div>`);
@@ -410,7 +430,7 @@ const userEventHandler = function (){
 
         socket.on("fileUploaded", (csvFileId, csvFileName) => {
             $("td#"+csvFileId).html('uploaded').attr("class","text-success");
-            $.notify("We have successfully uploaded " + csvFileName + "file", "success");
+            $.notify("We have successfully uploaded " + csvFileName + " file...     ", "success");
             $("div.progress-bar").remove();
             this.showUsers();
             this.showFiles(); 

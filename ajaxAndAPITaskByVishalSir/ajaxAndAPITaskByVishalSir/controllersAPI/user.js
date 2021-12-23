@@ -4,7 +4,10 @@ const { validationResult } = require('express-validator');
 const { Parser } = require('json2csv');
 const moment = require("moment");
 const fs = require('fs');
+const { promisify } = require("util");
+const unlinkFileAsync = promisify(fs.unlink);
 const csv = require("csvtojson");
+
 
 const { validateCsvData } = require("../utilities/validateCsvData");
 const { readFirstTwoRowCsv } = require("../utilities/readFirstTwoRowCsv");
@@ -235,6 +238,19 @@ exports.postMapAndUploadUsersAPI = async function (req, res, next) {
 
         return res.json({ status : "success", code : 200 });
 
+    } catch (error) {
+        console.log(error);
+        return res.json({ status : "error", code : 404, message : config.errorMessages[404] });
+    }
+}
+
+exports.getDeleteFileFromServerAPI = async function (req, res, next) {
+    try {
+        let deleteFileName = req.query.fileName;
+        await unlinkFileAsync('public/importedCsvFiles/' + deleteFileName);
+        await unlinkFileAsync('public/importedCsvFiles/firstTwoRow-' + deleteFileName);
+        console.log("Files deleted");
+        return res.json({ status : "success", code : 200 });
     } catch (error) {
         console.log(error);
         return res.json({ status : "error", code : 404, message : config.errorMessages[404] });

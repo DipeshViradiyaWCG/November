@@ -4,7 +4,7 @@ module.exports = function (options) {
     new CronJob(
         options.time,
         function() {
-            console.log("Console log from cronDemo2.js file...");
+            console.log("demo=demo=demo=demo=demo");
         },
         null,
         true,
